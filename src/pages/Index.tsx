@@ -17,10 +17,20 @@ const Index = () => {
   const [selectedEntry, setSelectedEntry] = useState<EntryWithCategory | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
   const { data: categories } = useCategories();
   const authorToken = getAuthorToken();
+
+  // Filter entries by search query
+  const filteredEntries = useMemo(() => {
+    if (!entries || !searchQuery.trim()) return entries;
+    const q = searchQuery.toLowerCase();
+    return entries.filter(
+      (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
+    );
+  }, [entries, searchQuery]);
 
   // Find categories where current user is admin
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];

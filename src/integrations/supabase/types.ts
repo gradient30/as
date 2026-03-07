@@ -14,7 +14,147 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          created_by_token: string
+          id: string
+          keywords: string[]
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_token: string
+          id?: string
+          keywords?: string[]
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          created_by_token?: string
+          id?: string
+          keywords?: string[]
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      category_admins: {
+        Row: {
+          admin_token: string
+          auto_merge_enabled: boolean
+          category_id: string
+          created_at: string
+          id: string
+          is_founder: boolean
+        }
+        Insert: {
+          admin_token: string
+          auto_merge_enabled?: boolean
+          category_id: string
+          created_at?: string
+          id?: string
+          is_founder?: boolean
+        }
+        Update: {
+          admin_token?: string
+          auto_merge_enabled?: boolean
+          category_id?: string
+          created_at?: string
+          id?: string
+          is_founder?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_admins_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entries: {
+        Row: {
+          author_token: string
+          category_id: string | null
+          content: string
+          contributors: string[]
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["entry_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_token: string
+          category_id?: string | null
+          content: string
+          contributors?: string[]
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["entry_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_token?: string
+          category_id?: string | null
+          content?: string
+          contributors?: string[]
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["entry_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entries_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entry_merges: {
+        Row: {
+          created_at: string
+          id: string
+          merged_by_token: string
+          source_content: string
+          source_title: string
+          target_entry_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          merged_by_token: string
+          source_content: string
+          source_title: string
+          target_entry_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          merged_by_token?: string
+          source_content?: string
+          source_title?: string
+          target_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_merges_target_entry_id_fkey"
+            columns: ["target_entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +163,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      entry_status: "approved" | "pending" | "merged"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +290,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      entry_status: ["approved", "pending", "merged"],
+    },
   },
 } as const

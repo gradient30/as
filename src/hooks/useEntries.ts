@@ -265,6 +265,23 @@ export function useDeleteEntry() {
   });
 }
 
+export function useUpdateEntry() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, title, content }: { id: string; title: string; content: string }) => {
+      const { error } = await supabase
+        .from('entries')
+        .update({ title, content })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entries'] });
+      toast.success('已更新');
+    },
+  });
+}
+
 export function useApproveEntry() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -293,6 +310,22 @@ export function useUpdateAutoMerge() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['category_admins'] });
       toast.success('设置已更新');
+    },
+  });
+}
+
+/** Get all category IDs where the current user is admin */
+export function useMyAdminCategoryIds() {
+  const authorToken = getAuthorToken();
+  return useQuery({
+    queryKey: ['my_admin_categories', authorToken],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('category_admins')
+        .select('category_id')
+        .eq('admin_token', authorToken);
+      if (error) throw error;
+      return new Set(data.map(d => d.category_id));
     },
   });
 }

@@ -1,27 +1,53 @@
 import { useState, useMemo } from 'react';
-import { useEntries, useCategories } from '@/hooks/useEntries';
+import { useEntries, useCategories, useMyAdminCategoryIds, useDeleteEntry } from '@/hooks/useEntries';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
 import { SubmitDialog } from '@/components/SubmitDialog';
+import { EditDialog } from '@/components/EditDialog';
 import { AdminPanel } from '@/components/AdminPanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Index = () => {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<EntryWithCategory | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState<EntryWithCategory | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [manageMode, setManageMode] = useState(false);
 
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
   const { data: categories } = useCategories();
+  const { data: adminCategoryIds } = useMyAdminCategoryIds();
+  const deleteEntry = useDeleteEntry();
   const authorToken = getAuthorToken();
+
+  const hasAdminRights = adminCategoryIds && adminCategoryIds.size > 0;
+
+  // Check if user can manage a specific entry
+  const canManageEntry = (entry: EntryWithCategory) => {
+    if (entry.author_token === authorToken) return true;
+    if (entry.category_id && adminCategoryIds?.has(entry.category_id)) return true;
+    return false;
+  };
 
   // Filter entries by search query
   const filteredEntries = useMemo(() => {
@@ -35,6 +61,23 @@ const Index = () => {
   // Find categories where current user is admin
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 
+  const handleEdit = (entry: EntryWithCategory) => {
+    setEditEntry(entry);
+    setEditOpen(true);
+    setDetailOpen(false);
+  };
+
+  const handleDelete = (entryId: string) => {
+    setDeleteConfirmId(entryId);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      deleteEntry.mutate(deleteConfirmId);
+      setDeleteConfirmId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -44,14 +87,35 @@ const Index = () => {
             <BookOpen className="h-5 w-5 text-primary" />
             <h1 className="text-lg font-bold tracking-tight">知识库</h1>
           </div>
-          <Button size="sm" onClick={() => setSubmitOpen(true)}>
-            <Plus className="h-4 w-4" />
-            录入知识
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Manage mode toggle — visible to anyone who has admin rights or authored entries */}
+            {hasAdminRights && (
+              <Button
+                size="sm"
+                variant={manageMode ? 'default' : 'outline'}
+                onClick={() => setManageMode(!manageMode)}
+              >
+                {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                {manageMode ? '浏览模式' : '管理模式'}
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setSubmitOpen(true)}>
+              <Plus className="h-4 w-4" />
+              录入知识
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Manage mode banner */}
+        {manageMode && (
+          <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            管理模式已开启 — 悬停卡片可编辑或删除条目，点击详情也可操作
+          </div>
+        )}
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -87,7 +151,7 @@ const Index = () => {
         )}
 
         {/* Admin panels for managed categories */}
-        {categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
+        {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
           <AdminPanel
             categoryId={categoryFilter}
             categoryName={adminCategories.find(c => c.id === categoryFilter)?.name || ''}
@@ -107,6 +171,10 @@ const Index = () => {
               <EntryCard
                 key={entry.id}
                 entry={entry}
+                isManageMode={manageMode}
+                canManage={canManageEntry(entry)}
+                onEdit={() => handleEdit(entry)}
+                onDelete={() => handleDelete(entry.id)}
                 onClick={() => {
                   setSelectedEntry(entry);
                   setDetailOpen(true);
@@ -129,7 +197,29 @@ const Index = () => {
 
       {/* Dialogs */}
       <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />
-      <EntryDetail entry={selectedEntry} open={detailOpen} onOpenChange={setDetailOpen} />
+      <EntryDetail
+        entry={selectedEntry}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        canManage={selectedEntry ? canManageEntry(selectedEntry) : false}
+        onEdit={() => selectedEntry && handleEdit(selectedEntry)}
+        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
+      />
+      <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>此操作不可撤销，确定要删除这条知识吗？</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>确认删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

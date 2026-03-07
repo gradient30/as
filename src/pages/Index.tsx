@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useEntries, useCategories } from '@/hooks/useEntries';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
@@ -6,8 +6,9 @@ import { SubmitDialog } from '@/components/SubmitDialog';
 import { AdminPanel } from '@/components/AdminPanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen } from 'lucide-react';
+import { Plus, BookOpen, Search } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
@@ -16,10 +17,20 @@ const Index = () => {
   const [selectedEntry, setSelectedEntry] = useState<EntryWithCategory | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
   const { data: categories } = useCategories();
   const authorToken = getAuthorToken();
+
+  // Filter entries by search query
+  const filteredEntries = useMemo(() => {
+    if (!entries || !searchQuery.trim()) return entries;
+    const q = searchQuery.toLowerCase();
+    return entries.filter(
+      (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
+    );
+  }, [entries, searchQuery]);
 
   // Find categories where current user is admin
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
@@ -41,6 +52,17 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="搜索知识..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
         {/* Category filters */}
         {categories && categories.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -79,9 +101,9 @@ const Index = () => {
               <Skeleton key={i} className="h-44 rounded-lg" />
             ))}
           </div>
-        ) : entries && entries.length > 0 ? (
+        ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {entries.map((entry) => (
+            {filteredEntries.map((entry) => (
               <EntryCard
                 key={entry.id}
                 entry={entry}

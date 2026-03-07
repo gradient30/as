@@ -101,9 +101,9 @@ const Index = () => {
               <Skeleton key={i} className="h-44 rounded-lg" />
             ))}
           </div>
-        ) : entries && entries.length > 0 ? (
+        ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {entries.map((entry) => (
+            {filteredEntries.map((entry) => (
               <EntryCard
                 key={entry.id}
                 entry={entry}

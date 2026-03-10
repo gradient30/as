@@ -1,0 +1,2 @@
+CREATE POLICY "Anyone can delete categories" ON public.categories FOR DELETE TO public USING (true);
+CREATE POLICY "Anyone can delete category_admins" ON public.category_admins FOR DELETE TO public USING (true);

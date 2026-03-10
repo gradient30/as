@@ -9,7 +9,7 @@ const STORAGE_KEY = 'preferred-layout-style';
 export function useLayoutStyle() {
   const { user } = useAuth();
   const [style, setStyleState] = useState<LayoutStyle>(() => {
-    return (localStorage.getItem(STORAGE_KEY) as LayoutStyle) || 'bento-glass';
+    return (localStorage.getItem(STORAGE_KEY) as LayoutStyle) || 'dark-editorial';
   });
   const [loaded, setLoaded] = useState(false);
 

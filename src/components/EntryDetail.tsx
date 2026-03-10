@@ -172,7 +172,7 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[60vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] max-w-[900px] p-0 border-l border-border/60 shadow-xl overflow-y-auto [&>button]:hidden">
+      <SheetContent side="right" className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 border-l border-border/60 shadow-xl overflow-y-auto [&>button]:hidden">
         {/* Clean header with thin bottom border */}
         <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur-sm z-10">
           <div className="flex items-start justify-between gap-2">

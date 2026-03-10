@@ -52,6 +52,7 @@ const Index = () => {
   const [manageMode, setManageMode] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'discover' | 'mine'>('discover');
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();

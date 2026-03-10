@@ -100,6 +100,9 @@ const Index = () => {
             <h1 className="text-lg font-bold tracking-tight">知识库</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="icon" variant="ghost" onClick={toggleDark} className="h-9 w-9">
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             {/* Manage mode toggle — visible to anyone who has admin rights or authored entries */}
             {hasAdminRights && (
               <Button

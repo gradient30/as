@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by_token: string
+          created_by_user_id: string | null
           id: string
           keywords: string[]
           name: string
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by_token: string
+          created_by_user_id?: string | null
           id?: string
           keywords?: string[]
           name: string
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by_token?: string
+          created_by_user_id?: string | null
           id?: string
           keywords?: string[]
           name?: string
@@ -49,6 +52,7 @@ export type Database = {
           created_at: string
           id: string
           is_founder: boolean
+          user_id: string | null
         }
         Insert: {
           admin_token: string
@@ -57,6 +61,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_founder?: boolean
+          user_id?: string | null
         }
         Update: {
           admin_token?: string
@@ -65,6 +70,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_founder?: boolean
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -87,6 +93,7 @@ export type Database = {
           status: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           author_token: string
@@ -98,6 +105,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           author_token?: string
@@ -109,6 +117,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["entry_status"]
           title?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -155,14 +164,104 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          old_author_token: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          old_author_token?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          old_author_token?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          reason: string
+          reporter_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       entry_status: "approved" | "pending" | "merged"
     }
     CompositeTypes: {
@@ -291,6 +390,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       entry_status: ["approved", "pending", "merged"],
     },
   },

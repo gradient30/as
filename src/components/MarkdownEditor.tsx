@@ -20,6 +20,7 @@ import {
   Table,
   Minus,
   CheckSquare,
+  FileCode,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -67,11 +68,16 @@ const markdownActions: MarkdownAction[] = [
     action: (t, s, e) => wrapSelection(t, s, e, '~~', '~~'),
   },
   {
-    icon: Code, label: '代码',
+    icon: Code, label: '行内代码',
+    action: (t, s, e) => wrapSelection(t, s, e, '`', '`'),
+  },
+  {
+    icon: FileCode, label: '代码块',
     action: (t, s, e) => {
-      const sel = t.slice(s, e);
-      if (sel.includes('\n')) return wrapSelection(t, s, e, '```\n', '\n```');
-      return wrapSelection(t, s, e, '`', '`');
+      const sel = t.slice(s, e) || '// 代码';
+      const block = '```js\n' + sel + '\n```';
+      const result = t.slice(0, s) + block + t.slice(e);
+      return { text: result, cursor: s + 6 + sel.length };
     },
   },
   {

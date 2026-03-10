@@ -11,6 +11,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { AuthDialog } from '@/components/AuthDialog';
 import { CategoryManager } from '@/components/CategoryManager';
 import { StyleSwitcher } from '@/components/StyleSwitcher';
+import { CyberLayout } from '@/components/CyberLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';

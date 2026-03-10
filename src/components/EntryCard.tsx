@@ -67,9 +67,12 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
 
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base font-semibold leading-snug line-clamp-2">
-            {entry.title}
-          </CardTitle>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <FileText className="h-4 w-4 text-primary shrink-0" />
+            <CardTitle className="text-base font-semibold leading-snug line-clamp-2">
+              {entry.title}
+            </CardTitle>
+          </div>
           {isPrivate && (
             <Badge variant="outline" className="text-xs gap-1 shrink-0">
               <EyeOff className="h-3 w-3" />
@@ -78,7 +81,8 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
           )}
         </div>
         {entry.categories && (
-          <Badge variant="secondary" className="w-fit text-xs mt-1">
+          <Badge variant="secondary" className="w-fit text-xs mt-1 gap-1">
+            <Tag className="h-3 w-3" />
             {entry.categories.name}
           </Badge>
         )}

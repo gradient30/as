@@ -572,7 +572,7 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
         className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
           !categoryFilter
             ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-            : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+             : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
         }`}
         onClick={() => setCategoryFilter(undefined)}
       >

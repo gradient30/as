@@ -172,8 +172,8 @@ const Index = () => {
               <span className="hidden sm:flex items-center gap-1.5 text-[hsl(180,100%,60%)]">
                 <Wifi className="h-3 w-3" /> ONLINE
               </span>
-              <span className="hidden md:inline text-[hsl(0,0%,60%)]">{String(totalCount).padStart(2, '0')}</span>
-              <span className="hidden md:inline text-[hsl(0,0%,60%)]">100%</span>
+              <span className="hidden md:inline text-[hsl(0,0%,75%)]">{String(totalCount).padStart(2, '0')}</span>
+              <span className="hidden md:inline text-[hsl(0,0%,75%)]">100%</span>
               <span className="text-[hsl(180,100%,60%)] text-base font-black tracking-widest cyber-glow">{currentTime}</span>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}

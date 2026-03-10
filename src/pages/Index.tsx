@@ -416,18 +416,14 @@ function ViewTabs({ viewMode, setViewMode, variant }: {
     );
   }
 
-  // glass (cyberpunk)
+  // default (editorial)
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-4">
       {tabs.map(t => (
         <button
           key={t.key}
           onClick={() => setViewMode(t.key)}
-          className={`px-4 py-1.5 text-xs font-mono tracking-wider transition-all border ${
-            viewMode === t.key
-              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)]'
-          }`}
+          className={`text-sm transition-colors ${viewMode === t.key ? 'text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {t.label}
         </button>

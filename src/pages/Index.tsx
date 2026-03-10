@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useEntries, useCategories, useMyAdminCategoryIds, useDeleteEntry } from '@/hooks/useEntries';
+import { useEntries, useCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
@@ -52,10 +52,12 @@ const Index = () => {
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
-  const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
+  // Admin sees ALL entries (including private)
+  const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
   const { data: categories } = useCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
+  const toggleVisibility = useToggleEntryVisibility();
   const authorToken = getAuthorToken();
   const { dark, toggle: toggleDark } = useDarkMode();
 
@@ -65,7 +67,15 @@ const Index = () => {
   const canManageEntry = (entry: EntryWithCategory) => {
     if (isGlobalAdmin) return true;
     if (entry.author_token === authorToken) return true;
+    if (user && entry.user_id === user.id) return true;
     if (entry.category_id && adminCategoryIds?.has(entry.category_id)) return true;
+    return false;
+  };
+
+  // Check if entry is own
+  const isOwnEntry = (entry: EntryWithCategory) => {
+    if (entry.author_token === authorToken) return true;
+    if (user && entry.user_id === user.id) return true;
     return false;
   };
 
@@ -221,9 +231,10 @@ const Index = () => {
                 entry={entry}
                 isManageMode={manageMode}
                 canManage={canManageEntry(entry)}
-                isOwn={entry.author_token === authorToken}
+                isOwn={isOwnEntry(entry)}
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
+                onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
                 onClick={() => {
                   setSelectedEntry(entry);
                   setDetailOpen(true);

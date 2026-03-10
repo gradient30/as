@@ -17,6 +17,7 @@ export type EntryWithCategory = {
   content: string;
   category_id: string | null;
   author_token: string;
+  user_id: string | null;
   status: 'approved' | 'pending' | 'merged';
   contributors: string[];
   created_at: string;
@@ -30,11 +31,17 @@ function generateShareToken(): string {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 16);
 }
 
-export function useEntries(categoryFilter?: string) {
+/** Get current user id synchronously (best-effort) */
+async function getCurrentUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user?.id ?? null;
+}
+
+export function useEntries(categoryFilter?: string, options?: { showAll?: boolean }) {
   const authorToken = getAuthorToken();
 
   return useQuery({
-    queryKey: ['entries', categoryFilter],
+    queryKey: ['entries', categoryFilter, options?.showAll],
     queryFn: async () => {
       let query = supabase
         .from('entries')
@@ -49,12 +56,16 @@ export function useEntries(categoryFilter?: string) {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Client-side filter: show public entries + own private entries
-      const entries = (data as unknown as EntryWithCategory[]).filter(
-        (e) => !e.is_private || e.author_token === authorToken
-      );
+      const entries = data as unknown as EntryWithCategory[];
 
-      return entries;
+      // If showAll (admin mode), return everything
+      if (options?.showAll) return entries;
+
+      // Otherwise filter: show public entries + own private entries
+      const userId = await getCurrentUserId();
+      return entries.filter(
+        (e) => !e.is_private || e.author_token === authorToken || (userId && e.user_id === userId)
+      );
     },
   });
 }
@@ -78,8 +89,16 @@ export function useEntryById(entryId?: string, shareToken?: string) {
 
       // Access check: public, own, or valid share token
       if (entry.is_private) {
-        if (entry.author_token !== authorToken && entry.share_token !== shareToken) {
-          throw new Error('无权访问该知识');
+        const userId = await getCurrentUserId();
+        const isOwner = entry.author_token === authorToken || (userId && entry.user_id === userId);
+        if (!isOwner && entry.share_token !== shareToken) {
+          // Check if admin
+          if (userId) {
+            const { data: roleData } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' });
+            if (!roleData) throw new Error('无权访问该知识');
+          } else {
+            throw new Error('无权访问该知识');
+          }
         }
       }
 
@@ -140,6 +159,7 @@ export function useSubmitEntry() {
   return useMutation({
     mutationFn: async ({ title, content, is_private = false }: { title: string; content: string; is_private?: boolean }) => {
       const authorToken = getAuthorToken();
+      const userId = await getCurrentUserId();
       const keywords = extractKeywords(title + ' ' + content);
 
       // Generate share token for private entries
@@ -176,7 +196,7 @@ export function useSubmitEntry() {
 
         const { data: newCat, error: catError } = await supabase
           .from('categories')
-          .insert({ name: catName, slug, keywords, created_by_token: authorToken })
+          .insert({ name: catName, slug, keywords, created_by_token: authorToken, created_by_user_id: userId })
           .select()
           .single();
 
@@ -189,6 +209,7 @@ export function useSubmitEntry() {
           admin_token: authorToken,
           is_founder: true,
           auto_merge_enabled: true,
+          user_id: userId,
         });
       }
 
@@ -199,6 +220,7 @@ export function useSubmitEntry() {
           content,
           category_id: categoryId,
           author_token: authorToken,
+          user_id: userId,
           status: 'approved' as const,
           contributors: [authorToken],
           is_private: true,
@@ -257,6 +279,7 @@ export function useSubmitEntry() {
                 content,
                 category_id: categoryId,
                 author_token: authorToken,
+                user_id: userId,
                 status: 'pending' as const,
                 contributors: [authorToken],
               });
@@ -276,6 +299,7 @@ export function useSubmitEntry() {
           content,
           category_id: categoryId,
           author_token: authorToken,
+          user_id: userId,
           status: 'approved' as const,
           contributors: [authorToken],
         });
@@ -293,6 +317,7 @@ export function useSubmitEntry() {
               category_id: categoryId,
               admin_token: authorToken,
               is_founder: true,
+              user_id: userId,
             });
           }
         }
@@ -337,6 +362,24 @@ export function useUpdateEntry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries'] });
       toast.success('已更新');
+    },
+  });
+}
+
+export function useToggleEntryVisibility() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, is_private }: { id: string; is_private: boolean }) => {
+      const shareToken = is_private ? generateShareToken() : null;
+      const { error } = await supabase
+        .from('entries')
+        .update({ is_private, share_token: shareToken })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entries'] });
+      toast.success('可见性已更新');
     },
   });
 }

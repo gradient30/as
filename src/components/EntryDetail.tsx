@@ -327,14 +327,14 @@ function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete,
 
 /* ── Main export: routes to style-specific detail ── */
 export function EntryDetail(props: EntryDetailProps) {
-  const { layoutStyle, ...rest } = props;
+  const { layoutStyle, drawerSide, ...rest } = props;
 
   switch (layoutStyle) {
     case 'dark-editorial':
-      return <EditorialDetail {...rest} />;
+      return <EditorialDetail {...rest} drawerSide={drawerSide} />;
     case 'neubrutalism':
-      return <NeuDetail {...rest} cardIndex={props.cardIndex} />;
+      return <NeuDetail {...rest} cardIndex={props.cardIndex} drawerSide={drawerSide} />;
     default:
-      return <DefaultDetail {...rest} />;
+      return <DefaultDetail {...rest} drawerSide={drawerSide} />;
   }
 }

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
-
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
+import { useLayoutStyle } from '@/hooks/useLayoutStyle';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
 import { SubmitDialog } from '@/components/SubmitDialog';
@@ -10,6 +10,7 @@ import { EditDialog } from '@/components/EditDialog';
 import { AdminPanel } from '@/components/AdminPanel';
 import { AuthDialog } from '@/components/AuthDialog';
 import { CategoryManager } from '@/components/CategoryManager';
+import { StyleSwitcher } from '@/components/StyleSwitcher';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -54,7 +55,7 @@ const Index = () => {
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
-  // Admin sees ALL entries (including private)
+  const { style, setStyle } = useLayoutStyle();
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
   const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
@@ -65,7 +66,6 @@ const Index = () => {
 
   const hasAdminRights = isGlobalAdmin || (adminCategoryIds && adminCategoryIds.size > 0);
 
-  // Check if user can manage a specific entry
   const canManageEntry = (entry: EntryWithCategory) => {
     if (isGlobalAdmin) return true;
     if (entry.author_token === authorToken) return true;
@@ -74,14 +74,12 @@ const Index = () => {
     return false;
   };
 
-  // Check if entry is own
   const isOwnEntry = (entry: EntryWithCategory) => {
     if (entry.author_token === authorToken) return true;
     if (user && entry.user_id === user.id) return true;
     return false;
   };
 
-  // Filter entries by search query
   const filteredEntries = useMemo(() => {
     if (!entries || !searchQuery.trim()) return entries;
     const q = searchQuery.toLowerCase();
@@ -90,7 +88,6 @@ const Index = () => {
     );
   }, [entries, searchQuery]);
 
-  // Find categories where current user is admin
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 
   const handleEdit = (entry: EntryWithCategory) => {
@@ -110,136 +107,139 @@ const Index = () => {
     }
   };
 
+  const entryCount = filteredEntries?.length || 0;
+  const todayCount = filteredEntries?.filter(e => {
+    const d = new Date(e.created_at);
+    const now = new Date();
+    return d.toDateString() === now.toDateString();
+  }).length || 0;
+  const myCount = filteredEntries?.filter(e => isOwnEntry(e)).length || 0;
+
+  // Background classes per style
+  const bgClass = style === 'bento-glass'
+    ? 'min-h-screen bg-gradient-to-br from-purple-500/20 via-pink-400/10 to-orange-300/10 dark:from-purple-900/30 dark:via-pink-900/10 dark:to-background'
+    : style === 'dark-editorial'
+    ? 'min-h-screen bg-background'
+    : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
+    <div className={bgClass}>
+      {/* Style Switcher Bar */}
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto flex items-center justify-between px-4 py-2">
+          <StyleSwitcher current={style} onChange={setStyle} />
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold tracking-tight">知识库</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="ghost" onClick={toggleDark} className="h-9 w-9">
+            <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            {user ? (
-              <>
-                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">
-                  {user.email}
-                </span>
-                {hasAdminRights && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant={manageMode ? 'default' : 'outline'}
-                      onClick={() => setManageMode(!manageMode)}
-                    >
-                      {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                      {manageMode ? '浏览模式' : '管理模式'}
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-9 w-9"
-                      onClick={() => setCategoryManagerOpen(true)}
-                      title="分类管理"
-                    >
-                      <Tags className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-                <Button size="icon" variant="ghost" onClick={signOut} className="h-9 w-9" title="退出登录">
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <Button size="sm" variant="outline" onClick={() => setAuthOpen(true)}>
-                <LogIn className="h-4 w-4" />
-                登录
-              </Button>
-            )}
-            <Button size="sm" onClick={() => setSubmitOpen(true)}>
-              <Plus className="h-4 w-4" />
-              录入知识
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      {/* Header — varies by style */}
+      {style === 'bento-glass' && (
+        <header className="container mx-auto px-4 pt-8 pb-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-1">知 识 库</p>
+          <div className="flex items-end justify-between">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight">My Brain</h1>
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm px-3 py-1">{entryCount} 条笔记</Badge>
+              <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
+                setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
+                setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
+            </div>
+          </div>
+        </header>
+      )}
+
+      {style === 'dark-editorial' && (
+        <header className="container mx-auto px-4 pt-6 pb-6">
+          <nav className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-6">
+              <h1 className="text-lg font-black uppercase tracking-widest">Knowledge</h1>
+              <span className="text-sm text-muted-foreground hidden sm:inline">发现</span>
+              <span className="text-sm text-muted-foreground hidden sm:inline">我的</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, ' · ')}
+              </span>
+              <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
+                setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
+                setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
+            </div>
+          </nav>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-primary mb-2">个 人 知 识 库</p>
+              <h2 className="text-5xl md:text-7xl font-black uppercase leading-none tracking-tighter">
+                <span className="block">MY</span>
+                <span className="block text-muted-foreground/30">BRAIN</span>
+              </h2>
+            </div>
+            <div className="flex gap-6 items-end">
+              {[
+                { n: entryCount, label: '笔记总数' },
+                { n: todayCount, label: '今日更新' },
+                { n: myCount, label: '我的' },
+              ].map(s => (
+                <div key={s.label} className="text-center">
+                  <p className="text-3xl font-black text-primary">{s.n}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </header>
+      )}
+
+      {style === 'neubrutalism' && (
+        <header className="container mx-auto px-4 pt-6 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🧠</span>
+              <div>
+                <h1 className="text-2xl font-black uppercase tracking-wider">Knowledge</h1>
+                <p className="text-xs text-muted-foreground">个人知识库 · v2.0</p>
+              </div>
+            </div>
+            <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
+              setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
+              setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen}
+              neuStyle />
+          </div>
+        </header>
+      )}
+
+      <main className="container mx-auto px-4 py-4 space-y-5">
         {/* Manage mode banner */}
         {manageMode && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            管理模式已开启 — 悬停卡片可编辑或删除条目，点击详情也可操作
+            管理模式已开启
           </div>
         )}
 
         {/* Search */}
-        <div className="relative">
+        <div className={`relative ${style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="搜索知识..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className={`pl-9 ${style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
         </div>
 
         {/* Category filters */}
-        {categories && categories.length > 0 && (() => {
-          const l1Cats = categories.filter((c: CategoryRow) => !c.parent_id && c.is_system);
-          const getChildren = (pid: string) => categories.filter((c: CategoryRow) => c.parent_id === pid);
-          return (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={!categoryFilter ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => setCategoryFilter(undefined)}
-                >
-                  全部
-                </Badge>
-                {l1Cats.map((cat: CategoryRow) => (
-                  <Badge
-                    key={cat.id}
-                    variant={categoryFilter === cat.id ? 'default' : 'outline'}
-                    className="cursor-pointer"
-                    onClick={() => setCategoryFilter(cat.id)}
-                  >
-                    {cat.name}
-                  </Badge>
-                ))}
-              </div>
-              {/* L2 sub-categories when L1 is selected */}
-              {categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) && (
-                <div className="flex flex-wrap gap-2 pl-4">
-                  <Badge
-                    variant={categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) ? 'default' : 'outline'}
-                    className="cursor-pointer text-xs"
-                    onClick={() => {/* already filtering by L1 */}}
-                  >
-                    全部子分类
-                  </Badge>
-                  {getChildren(categoryFilter).map((sub: CategoryRow) => (
-                    <Badge
-                      key={sub.id}
-                      variant={categoryFilter === sub.id ? 'default' : 'outline'}
-                      className="cursor-pointer text-xs"
-                      onClick={() => setCategoryFilter(sub.id)}
-                    >
-                      {sub.name}
-                      {!sub.is_approved && <span className="ml-1 opacity-60">（待审核）</span>}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })()}
+        <CategoryFilters
+          categories={categories}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          style={style}
+        />
 
-        {/* Admin panels for managed categories */}
+        {/* Admin panels */}
         {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
           <AdminPanel
             categoryId={categoryFilter}
@@ -247,16 +247,33 @@ const Index = () => {
           />
         )}
 
-        {/* Entry grid */}
+        {/* Editorial table header */}
+        {style === 'dark-editorial' && filteredEntries && filteredEntries.length > 0 && (
+          <div className="grid grid-cols-[40px_1fr_auto_auto_auto] items-center gap-4 px-2 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-2">
+            <span>#</span>
+            <span>标题 / 内容</span>
+            <span className="hidden md:block">标签</span>
+            <span className="hidden lg:block">分类</span>
+            <span className="text-right">时间</span>
+          </div>
+        )}
+
+        {/* Entry grid/list */}
         {entriesLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={style === 'dark-editorial' ? 'space-y-2' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-44 rounded-lg" />
+              <Skeleton key={i} className={style === 'dark-editorial' ? 'h-16 w-full' : 'h-48 rounded-xl'} />
             ))}
           </div>
         ) : filteredEntries && filteredEntries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredEntries.map((entry) => (
+          <div className={
+            style === 'dark-editorial'
+              ? 'divide-y-0'
+              : style === 'bento-glass'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto'
+              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'
+          }>
+            {filteredEntries.map((entry, i) => (
               <EntryCard
                 key={entry.id}
                 entry={entry}
@@ -266,10 +283,9 @@ const Index = () => {
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
-                onClick={() => {
-                  setSelectedEntry(entry);
-                  setDetailOpen(true);
-                }}
+                onClick={() => { setSelectedEntry(entry); setDetailOpen(true); }}
+                layoutStyle={style}
+                index={i}
               />
             ))}
           </div>
@@ -279,8 +295,7 @@ const Index = () => {
             <h2 className="text-lg font-medium text-muted-foreground mb-1">暂无知识条目</h2>
             <p className="text-sm text-muted-foreground/70 mb-4">成为第一个录入知识的人吧！</p>
             <Button onClick={() => setSubmitOpen(true)}>
-              <Plus className="h-4 w-4" />
-              录入知识
+              <Plus className="h-4 w-4" />录入知识
             </Button>
           </div>
         )}
@@ -288,19 +303,14 @@ const Index = () => {
 
       {/* Dialogs */}
       <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />
-      <EntryDetail
-        entry={selectedEntry}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
+      <EntryDetail entry={selectedEntry} open={detailOpen} onOpenChange={setDetailOpen}
         canManage={selectedEntry ? canManageEntry(selectedEntry) : false}
         onEdit={() => selectedEntry && handleEdit(selectedEntry)}
-        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
-      />
+        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)} />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />
 
-      {/* Delete confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -316,5 +326,151 @@ const Index = () => {
     </div>
   );
 };
+
+// ===== Sub-components =====
+
+function HeaderActions({ user, hasAdminRights, manageMode, setManageMode, signOut, setAuthOpen, setSubmitOpen, setCategoryManagerOpen, neuStyle }: any) {
+  return (
+    <div className="flex items-center gap-2">
+      {user ? (
+        <>
+          <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[100px]">
+            {user.email}
+          </span>
+          {hasAdminRights && (
+            <>
+              <Button size="sm" variant={manageMode ? 'default' : 'outline'} onClick={() => setManageMode(!manageMode)} className="hidden sm:flex">
+                {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                {manageMode ? '浏览' : '管理'}
+              </Button>
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setCategoryManagerOpen(true)} title="分类管理">
+                <Tags className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          <Button size="icon" variant="ghost" onClick={signOut} className="h-8 w-8" title="退出登录">
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </>
+      ) : (
+        <Button size="sm" variant="outline" onClick={() => setAuthOpen(true)}>
+          <LogIn className="h-4 w-4" />登录
+        </Button>
+      )}
+      <Button
+        size="sm"
+        onClick={() => setSubmitOpen(true)}
+        className={neuStyle ? 'border-2 border-foreground/80 bg-background text-foreground hover:bg-foreground hover:text-background font-bold' : ''}
+      >
+        <Plus className="h-4 w-4" />
+        {neuStyle ? '新建笔记' : '录入知识'}
+      </Button>
+    </div>
+  );
+}
+
+function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style }: {
+  categories: CategoryRow[] | undefined;
+  categoryFilter: string | undefined;
+  setCategoryFilter: (id: string | undefined) => void;
+  style: string;
+}) {
+  if (!categories || categories.length === 0) return null;
+
+  const l1Cats = categories.filter((c: CategoryRow) => !c.parent_id && c.is_system);
+  const getChildren = (pid: string) => categories.filter((c: CategoryRow) => c.parent_id === pid);
+
+  if (style === 'dark-editorial') {
+    return (
+      <div className="flex flex-wrap gap-4 border-b border-border/30 pb-3">
+        <button
+          className={`text-sm transition-colors ${!categoryFilter ? 'text-primary font-bold border-b-2 border-primary pb-1' : 'text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setCategoryFilter(undefined)}
+        >
+          全部
+        </button>
+        {l1Cats.map((cat: CategoryRow) => (
+          <button
+            key={cat.id}
+            className={`text-sm transition-colors ${categoryFilter === cat.id ? 'text-primary font-bold border-b-2 border-primary pb-1' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setCategoryFilter(cat.id)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  if (style === 'neubrutalism') {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <button
+          className={`px-4 py-2 text-sm rounded-lg border-2 transition-all ${
+            !categoryFilter
+              ? 'border-foreground/80 bg-foreground text-background font-bold'
+              : 'border-foreground/30 bg-background hover:border-foreground/60'
+          }`}
+          onClick={() => setCategoryFilter(undefined)}
+        >
+          全部
+        </button>
+        {l1Cats.map((cat: CategoryRow) => (
+          <button
+            key={cat.id}
+            className={`px-4 py-2 text-sm rounded-lg border-2 transition-all ${
+              categoryFilter === cat.id
+                ? 'border-foreground/80 bg-foreground text-background font-bold'
+                : 'border-foreground/30 bg-background hover:border-foreground/60'
+            }`}
+            onClick={() => setCategoryFilter(cat.id)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // Bento Glass (default)
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <Badge
+          variant={!categoryFilter ? 'default' : 'outline'}
+          className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+          onClick={() => setCategoryFilter(undefined)}
+        >
+          全部
+        </Badge>
+        {l1Cats.map((cat: CategoryRow) => (
+          <Badge
+            key={cat.id}
+            variant={categoryFilter === cat.id ? 'default' : 'outline'}
+            className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+            onClick={() => setCategoryFilter(cat.id)}
+          >
+            {cat.name}
+          </Badge>
+        ))}
+      </div>
+      {categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) && (
+        <div className="flex flex-wrap gap-2 pl-4">
+          {getChildren(categoryFilter).map((sub: CategoryRow) => (
+            <Badge
+              key={sub.id}
+              variant={categoryFilter === sub.id ? 'default' : 'outline'}
+              className="cursor-pointer text-xs"
+              onClick={() => setCategoryFilter(sub.id)}
+            >
+              {sub.name}
+              {!sub.is_approved && <span className="ml-1 opacity-60">（待审核）</span>}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Index;

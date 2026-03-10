@@ -87,8 +87,11 @@ const Index = () => {
     return false;
   };
 
+  const activeEntries = isSmartFilter ? smartEntries : entries;
+  const activeLoading = isSmartFilter ? smartLoading : entriesLoading;
+
   const filteredEntries = useMemo(() => {
-    let result = entries;
+    let result = activeEntries;
     if (!result) return result;
     // View mode filter
     if (viewMode === 'mine') {
@@ -102,7 +105,7 @@ const Index = () => {
       );
     }
     return result;
-  }, [entries, searchQuery, viewMode, authorToken, user]);
+  }, [activeEntries, searchQuery, viewMode, authorToken, user]);
 
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 

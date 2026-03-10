@@ -351,7 +351,9 @@ const Index = () => {
       <EntryDetail entry={selectedEntry} open={detailOpen} onOpenChange={setDetailOpen}
         canManage={selectedEntry ? canManageEntry(selectedEntry) : false}
         onEdit={() => selectedEntry && handleEdit(selectedEntry)}
-        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)} />
+        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
+        layoutStyle={style}
+        cardIndex={selectedEntryIndex} />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />

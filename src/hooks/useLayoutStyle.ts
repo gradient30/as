@@ -3,13 +3,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 export type LayoutStyle = 'bento-glass' | 'dark-editorial' | 'neubrutalism';
+export type DrawerSide = 'left' | 'right' | 'top' | 'bottom';
 
 const STORAGE_KEY = 'preferred-layout-style';
+const SIDE_STORAGE_KEY = 'preferred-drawer-side';
 
 export function useLayoutStyle() {
   const { user } = useAuth();
   const [style, setStyleState] = useState<LayoutStyle>(() => {
     return (localStorage.getItem(STORAGE_KEY) as LayoutStyle) || 'dark-editorial';
+  });
+  const [drawerSide, setDrawerSideState] = useState<DrawerSide>(() => {
+    return (localStorage.getItem(SIDE_STORAGE_KEY) as DrawerSide) || 'right';
   });
   const [loaded, setLoaded] = useState(false);
 
@@ -43,7 +48,12 @@ export function useLayoutStyle() {
     }
   }, [user]);
 
-  return { style, setStyle, loaded };
+  const setDrawerSide = useCallback((side: DrawerSide) => {
+    setDrawerSideState(side);
+    localStorage.setItem(SIDE_STORAGE_KEY, side);
+  }, []);
+
+  return { style, setStyle, drawerSide, setDrawerSide, loaded };
 }
 
 // Card color palette for Neubrutalism style

@@ -20,6 +20,8 @@ import { useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { LayoutStyle } from '@/hooks/useLayoutStyle';
 import { getCardColor } from '@/hooks/useLayoutStyle';
 
+type SheetSide = 'left' | 'right' | 'top' | 'bottom';
+
 interface EntryDetailProps {
   entry: EntryWithCategory | null;
   open: boolean;
@@ -29,6 +31,7 @@ interface EntryDetailProps {
   onDelete?: () => void;
   layoutStyle?: LayoutStyle;
   cardIndex?: number;
+  drawerSide?: SheetSide;
 }
 
 function getShareUrl(entry: EntryWithCategory) {
@@ -51,6 +54,14 @@ function getCategoryEmoji(name?: string): string {
     '创意灵感': '💡', '行业资讯': '📰', '工具推荐': '🔧', '管理': '👔',
   };
   return map[name] || '📄';
+}
+
+/* ── Responsive size classes based on drawer side ── */
+function getSizeClasses(side: SheetSide): string {
+  if (side === 'top' || side === 'bottom') {
+    return 'h-[70vh] sm:h-[60vh] w-full';
+  }
+  return 'w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px]';
 }
 
 function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCategory; shareOpen: boolean; setShareOpen: (v: boolean) => void }) {
@@ -167,12 +178,12 @@ function ActionButtons({ entry, canManage, onEdit, onDelete, onClose, layoutStyl
 /* ═══════════════════════════════════════════════
    EDITORIAL STYLE — right drawer, white, thin borders, light shadow
    ═══════════════════════════════════════════════ */
-function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
   if (!entry) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 border-l border-border/60 shadow-xl overflow-y-auto [&>button]:hidden">
+      <SheetContent side={drawerSide} className={`${getSizeClasses(drawerSide)} p-0 border-border/60 shadow-xl overflow-y-auto [&>button]:hidden`}>
         {/* Clean header with thin bottom border */}
         <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur-sm z-10">
           <div className="flex items-start justify-between gap-2">
@@ -216,7 +227,7 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
 /* ═══════════════════════════════════════════════
    NEUBRUTALISM STYLE — right drawer, colored header, thick border, hard shadow
    ═══════════════════════════════════════════════ */
-function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0 }: Omit<EntryDetailProps, 'layoutStyle'>) {
+function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle'>) {
   if (!entry) return null;
 
   const headerColor = getCardColor(cardIndex);
@@ -224,8 +235,8 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="right"
-        className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 border-l-[3px] border-foreground/80 shadow-[-8px_0_0_hsl(var(--foreground)/0.15)] overflow-y-auto [&>button]:hidden"
+        side={drawerSide}
+        className={`${getSizeClasses(drawerSide)} p-0 border-[3px] border-foreground/80 shadow-[-8px_0_0_hsl(var(--foreground)/0.15)] overflow-y-auto [&>button]:hidden`}
       >
         {/* Colored header block matching card */}
         <div className="px-6 pt-5 pb-4 sticky top-0 z-10" style={{ backgroundColor: headerColor }}>
@@ -281,12 +292,12 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
 /* ═══════════════════════════════════════════════
    DEFAULT / FALLBACK (bento-glass uses CyberLayout's built-in detail)
    ═══════════════════════════════════════════════ */
-function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
   if (!entry) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 overflow-y-auto [&>button]:hidden">
+      <SheetContent side={drawerSide} className={`${getSizeClasses(drawerSide)} p-0 overflow-y-auto [&>button]:hidden`}>
         <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background z-10">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0 space-y-1">
@@ -316,14 +327,14 @@ function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete 
 
 /* ── Main export: routes to style-specific detail ── */
 export function EntryDetail(props: EntryDetailProps) {
-  const { layoutStyle, ...rest } = props;
+  const { layoutStyle, drawerSide, ...rest } = props;
 
   switch (layoutStyle) {
     case 'dark-editorial':
-      return <EditorialDetail {...rest} />;
+      return <EditorialDetail {...rest} drawerSide={drawerSide} />;
     case 'neubrutalism':
-      return <NeuDetail {...rest} cardIndex={props.cardIndex} />;
+      return <NeuDetail {...rest} cardIndex={props.cardIndex} drawerSide={drawerSide} />;
     default:
-      return <DefaultDetail {...rest} />;
+      return <DefaultDetail {...rest} drawerSide={drawerSide} />;
   }
 }

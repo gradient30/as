@@ -59,7 +59,7 @@ const Index = () => {
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
-  const { style, setStyle } = useLayoutStyle();
+  const { style, setStyle, drawerSide, setDrawerSide } = useLayoutStyle();
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
   const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
@@ -156,7 +156,7 @@ const Index = () => {
         {/* Style Switcher Bar */}
         <div className="border-[hsl(var(--cyber-border))] bg-[hsl(var(--cyber-sidebar))] backdrop-blur-sm border-b">
           <div className="container mx-auto flex items-center justify-between px-4 py-2">
-            <StyleSwitcher current={style} onChange={setStyle} />
+            <StyleSwitcher current={style} onChange={setStyle} drawerSide={drawerSide} onDrawerSideChange={setDrawerSide} />
             <div className="flex items-center gap-2">
               <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -215,7 +215,7 @@ const Index = () => {
       {/* Style Switcher Bar */}
       <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
-          <StyleSwitcher current={style} onChange={setStyle} />
+          <StyleSwitcher current={style} onChange={setStyle} drawerSide={drawerSide} onDrawerSideChange={setDrawerSide} />
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -355,7 +355,8 @@ const Index = () => {
         onEdit={() => selectedEntry && handleEdit(selectedEntry)}
         onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
         layoutStyle={style}
-        cardIndex={selectedEntryIndex} />
+        cardIndex={selectedEntryIndex}
+        drawerSide={drawerSide} />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />

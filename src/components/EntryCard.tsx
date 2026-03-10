@@ -85,11 +85,9 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
         {getCategoryEmoji(entry.categories?.name)}
       </div>
 
-      {entry.categories && (
-        <Badge className="mb-2 bg-black/20 dark:bg-white/10 text-foreground border-0 text-[11px]">
-          {entry.categories.name}
-        </Badge>
-      )}
+      <Badge className="mb-2 bg-black/20 dark:bg-white/10 text-foreground border-0 text-[11px]">
+        {entry.categories?.name || '未知分类'}
+      </Badge>
 
       <h3 className={`font-bold mb-2 leading-tight ${isLarge ? 'text-2xl' : 'text-lg'}`}>
         {entry.title}
@@ -149,16 +147,14 @@ function DarkEditorialCard({ entry, onClick, isManageMode, canManage, isOwn, onE
 
         {/* Tags */}
         <div className="hidden md:block">
-          {entry.categories && (
-            <Badge variant="outline" className="text-xs">
-              {entry.categories.name}
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs">
+            {entry.categories?.name || '未知分类'}
+          </Badge>
         </div>
 
         {/* Category parent (from categories table) - placeholder */}
         <div className="hidden lg:block text-sm text-muted-foreground whitespace-nowrap">
-          {entry.categories?.name || '未分类'}
+          {entry.categories?.name || '未知分类'}
         </div>
 
         {/* Time */}
@@ -190,11 +186,9 @@ function NeubrutalismCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
         {isOwn && <OwnBadge variant="inline" />}
       </div>
 
-      {entry.categories && (
-        <Badge className="mb-2 bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
-          {entry.categories.name}
-        </Badge>
-      )}
+      <Badge className="mb-2 bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
+        {entry.categories?.name || '未知分类'}
+      </Badge>
 
       <h3 className="font-black text-xl text-foreground/90 mb-2 leading-tight line-clamp-2">
         {entry.title}

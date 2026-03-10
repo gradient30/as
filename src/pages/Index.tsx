@@ -359,11 +359,11 @@ const Index = () => {
         <footer className="fixed bottom-0 left-0 right-0 border-t border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.95] backdrop-blur-sm z-40">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between text-[10px] font-mono tracking-[0.15em]">
             <div className="flex items-center gap-6">
-              <span className="text-[hsl(210,20%,45%)]">STATUS: <span className="text-[hsl(120,80%,50%)] italic">OPERATIONAL</span></span>
-              <span className="text-[hsl(210,20%,45%)]">NOTES: <span className="text-[hsl(0,0%,80%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
-              <span className="hidden sm:inline text-[hsl(210,20%,45%)]">LAST SYNC: <span className="text-[hsl(180,80%,50%)]">{currentTime}</span></span>
+              <span className="text-[hsl(210,20%,60%)]">STATUS: <span className="text-[hsl(120,80%,55%)] italic">OPERATIONAL</span></span>
+              <span className="text-[hsl(210,20%,60%)]">NOTES: <span className="text-[hsl(0,0%,85%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
+              <span className="hidden sm:inline text-[hsl(210,20%,60%)]">LAST SYNC: <span className="text-[hsl(180,80%,55%)]">{currentTime}</span></span>
             </div>
-            <span className="text-[hsl(210,20%,45%)]">STORAGE: <span className="text-[hsl(180,100%,50%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
+            <span className="text-[hsl(210,20%,60%)]">STORAGE: <span className="text-[hsl(180,100%,55%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
           </div>
         </footer>
       )}

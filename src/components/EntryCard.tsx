@@ -147,11 +147,9 @@ function DarkEditorialCard({ entry, onClick, isManageMode, canManage, isOwn, onE
 
         {/* Tags */}
         <div className="hidden md:block">
-          {entry.categories && (
-            <Badge variant="outline" className="text-xs">
-              {entry.categories.name}
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs">
+            {entry.categories?.name || '未知分类'}
+          </Badge>
         </div>
 
         {/* Category parent (from categories table) - placeholder */}

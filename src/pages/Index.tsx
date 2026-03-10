@@ -128,11 +128,10 @@ const Index = () => {
 
   // Current time for cyberpunk display
   const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false }));
-  // Update time every second for bento-glass
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false })), 1000);
     return () => clearInterval(interval);
-  });
+  }, []);
 
   // Background classes per style
   const bgClass = style === 'bento-glass'

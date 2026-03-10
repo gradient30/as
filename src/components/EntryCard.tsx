@@ -186,7 +186,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       {!isLarge && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] uppercase tracking-widest text-[hsl(210,20%,45%)] font-mono">PROGRESS</span>
+            <span className="text-[10px] uppercase tracking-widest text-[hsl(210,20%,60%)] font-mono">PROGRESS</span>
             <span className="text-[10px] font-bold text-[hsl(180,100%,60%)]">{progress}%</span>
           </div>
           <div className="h-1 bg-[hsl(220,30%,15%)] rounded-full overflow-hidden">

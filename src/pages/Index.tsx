@@ -44,6 +44,7 @@ const useDarkMode = () => {
 const Index = () => {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<EntryWithCategory | null>(null);
+  const [selectedEntryIndex, setSelectedEntryIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<EntryWithCategory | null>(null);
   const [editOpen, setEditOpen] = useState(false);

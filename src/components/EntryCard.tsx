@@ -80,12 +80,6 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
             </Badge>
           )}
         </div>
-        {entry.categories && (
-          <Badge variant="secondary" className="w-fit text-xs mt-1 gap-1">
-            <Tag className="h-3 w-3" />
-            {entry.categories.name}
-          </Badge>
-        )}
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
@@ -93,9 +87,17 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
         </p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>
-          {entry.contributors.length > 1 && (
-            <span>{entry.contributors.length} 位贡献者</span>
-          )}
+          <div className="flex items-center gap-2">
+            {entry.contributors.length > 1 && (
+              <span>{entry.contributors.length} 位贡献者</span>
+            )}
+            {entry.categories && (
+              <span className="flex items-center gap-0.5">
+                <Tag className="h-3 w-3" />
+                {entry.categories.name}
+              </span>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

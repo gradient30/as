@@ -566,43 +566,32 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
     );
   }
 
-  // Bento Glass (default)
+  // Bento Glass (cyberpunk)
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-          <Badge
-          variant={!categoryFilter ? 'default' : 'outline'}
-          className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
-          onClick={() => setCategoryFilter(undefined)}
+    <div className="flex flex-wrap gap-2">
+      <button
+        className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
+          !categoryFilter
+            ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+            : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+        }`}
+        onClick={() => setCategoryFilter(undefined)}
+      >
+        全部
+      </button>
+      {l1Cats.map((cat: CategoryRow) => (
+        <button
+          key={cat.id}
+          className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
+            categoryFilter === cat.id
+              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+          }`}
+          onClick={() => setCategoryFilter(cat.id)}
         >
-          全部
-        </Badge>
-        {l1Cats.map((cat: CategoryRow) => (
-          <Badge
-            key={cat.id}
-            variant={categoryFilter === cat.id ? 'default' : 'outline'}
-            className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
-            onClick={() => setCategoryFilter(cat.id)}
-          >
-            {cat.name}
-          </Badge>
-        ))}
-      </div>
-      {categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) && (
-        <div className="flex flex-wrap gap-2 pl-4">
-          {getChildren(categoryFilter).map((sub: CategoryRow) => (
-            <Badge
-              key={sub.id}
-              variant={categoryFilter === sub.id ? 'default' : 'outline'}
-              className="cursor-pointer text-xs"
-              onClick={() => setCategoryFilter(sub.id)}
-            >
-              {sub.name}
-              {!sub.is_approved && <span className="ml-1 opacity-60">（待审核）</span>}
-            </Badge>
-          ))}
-        </div>
-      )}
+          {cat.name}
+        </button>
+      ))}
     </div>
   );
 }
@@ -610,16 +599,19 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
 function SkeletonLoader({ style }: { style: string }) {
   if (style === 'dark-editorial') {
     return (
-      <div className="space-y-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-4 py-4 px-2 border-b border-border/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
-            <Skeleton className="h-8 w-8 rounded" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
+          <div key={i} className="rounded-lg border border-border/30 p-4 space-y-3 animate-pulse">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-12" />
+              <Skeleton className="h-5 w-16" />
             </div>
-            <Skeleton className="h-5 w-16 rounded hidden md:block" />
-            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <div className="flex justify-between">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-8 w-8" />
+            </div>
           </div>
         ))}
       </div>
@@ -632,10 +624,8 @@ function SkeletonLoader({ style }: { style: string }) {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border-2 border-foreground/20 p-5 space-y-3 animate-fade-in"
+            className="rounded-xl border-2 border-foreground/20 p-5 space-y-3 animate-pulse"
             style={{
-              animationDelay: `${i * 100}ms`,
-              animationFillMode: 'both',
               backgroundColor: `hsl(${[50, 160, 270, 350, 200, 30][i % 6]} ${i % 2 === 0 ? '60%' : '70%'} 90% / 0.4)`,
             }}
           >
@@ -654,21 +644,31 @@ function SkeletonLoader({ style }: { style: string }) {
     );
   }
 
-  // Bento Glass
+  // Bento Glass (cyberpunk)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/8 dark:to-blue-900/5 border border-cyan-300/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
-          style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
+          className={`p-5 space-y-3 cyber-border cyber-border-bottom bg-[hsl(220,40%,8%)/0.6] animate-pulse ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
         >
-          <Skeleton className="h-10 w-10 rounded-full bg-cyan-400/10" />
-          <Skeleton className={`h-5 w-24 rounded bg-cyan-400/10`} />
-          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-cyan-400/10`} />
-          <Skeleton className="h-4 w-full bg-cyan-400/10" />
-          {i === 0 && <Skeleton className="h-4 w-2/3 bg-cyan-400/10" />}
-          <Skeleton className="h-3 w-32 bg-cyan-400/10 mt-auto" />
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-14 bg-[hsl(180,100%,50%/0.1)]" />
+            <Skeleton className="h-5 w-20 bg-[hsl(220,30%,15%)]" />
+          </div>
+          <Skeleton className="h-3 w-32 bg-[hsl(220,30%,15%)]" />
+          <Skeleton className={`${i === 0 ? 'h-9' : 'h-6'} w-3/4 bg-[hsl(180,100%,50%/0.08)]`} />
+          <Skeleton className="h-4 w-full bg-[hsl(220,30%,12%)]" />
+          {i === 0 && (
+            <div className="flex items-center gap-4 mt-2">
+              <Skeleton className="h-16 w-16 rounded-full bg-[hsl(180,100%,50%/0.08)]" />
+              <Skeleton className="h-8 w-20 bg-[hsl(220,30%,12%)]" />
+            </div>
+          )}
+          <div className="flex justify-between border-t border-[hsl(180,100%,50%/0.05)] pt-3">
+            <Skeleton className="h-3 w-32 bg-[hsl(220,30%,12%)]" />
+            <Skeleton className="h-3 w-12 bg-[hsl(220,30%,12%)]" />
+          </div>
         </div>
       ))}
     </div>

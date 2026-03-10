@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSubmitEntry } from '@/hooks/useEntries';
-import { Loader2, EyeOff } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Loader2, EyeOff, AlertTriangle } from 'lucide-react';
 import { MarkdownEditor } from '@/components/MarkdownEditor';
 
 interface SubmitDialogProps {
@@ -24,6 +25,7 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
   const [content, setContent] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const submitEntry = useSubmitEntry();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +51,22 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
             支持 Markdown 语法，可实时预览。系统将自动分类，相似知识将被智能合并。
           </DialogDescription>
         </DialogHeader>
+
+        {/* Anonymous warning */}
+        {!user && (
+          <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+            <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            <div className="text-sm space-y-1">
+              <p className="font-medium text-destructive">未登录提醒</p>
+              <p className="text-muted-foreground">
+                当前以匿名身份录入，知识所有权仅与当前浏览器绑定。
+                <strong className="text-foreground">更换设备、清除缓存或使用隐身模式都将永久失去管理权限</strong>。
+                建议先登录账号后再录入，以确保知识与账号绑定。
+              </p>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">标题</Label>

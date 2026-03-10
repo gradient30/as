@@ -8,11 +8,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Pencil, Trash2, Share2, EyeOff, Check } from 'lucide-react';
+import { Pencil, Trash2, Share2, EyeOff, Eye, Check } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
+import { useToggleEntryVisibility } from '@/hooks/useEntries';
 
 interface EntryDetailProps {
   entry: EntryWithCategory | null;
@@ -25,12 +26,13 @@ interface EntryDetailProps {
 
 export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: EntryDetailProps) {
   const [copied, setCopied] = useState(false);
+  const toggleVisibility = useToggleEntryVisibility();
 
   if (!entry) return null;
 
   const handleShare = async () => {
-    const isPrivate = (entry as any).is_private;
-    const shareToken = (entry as any).share_token;
+    const isPrivate = entry.is_private;
+    const shareToken = entry.share_token;
 
     let url = `${window.location.origin}/?entry=${entry.id}`;
     if (isPrivate && shareToken) {
@@ -47,7 +49,11 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
     }
   };
 
-  const isPrivate = (entry as any).is_private;
+  const handleToggleVisibility = () => {
+    toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private });
+  };
+
+  const isPrivate = entry.is_private;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -69,6 +75,16 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
               </Button>
               {canManage && (
                 <>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={handleToggleVisibility}
+                    disabled={toggleVisibility.isPending}
+                    title={isPrivate ? '设为公开' : '设为私密'}
+                  >
+                    {isPrivate ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onEdit}>
                     <Pencil className="h-4 w-4" />
                   </Button>

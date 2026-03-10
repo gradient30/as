@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Pencil, Trash2, EyeOff, User } from 'lucide-react';
+import { Pencil, Trash2, EyeOff, Eye, User } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
 interface EntryCardProps {
@@ -13,10 +13,11 @@ interface EntryCardProps {
   isOwn?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onToggleVisibility?: () => void;
 }
 
-export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit, onDelete }: EntryCardProps) {
-  const isPrivate = (entry as any).is_private;
+export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit, onDelete, onToggleVisibility }: EntryCardProps) {
+  const isPrivate = entry.is_private;
 
   return (
     <Card
@@ -36,6 +37,15 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
       {/* Admin overlay actions */}
       {isManageMode && canManage && (
         <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7"
+            onClick={(e) => { e.stopPropagation(); onToggleVisibility?.(); }}
+            title={isPrivate ? '设为公开' : '设为私密'}
+          >
+            {isPrivate ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+          </Button>
           <Button
             size="icon"
             variant="secondary"

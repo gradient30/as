@@ -151,7 +151,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       </h3>
 
       {/* Snippet */}
-      <p className={`text-sm text-[hsl(210,20%,55%)] ${isLarge ? 'line-clamp-3' : 'line-clamp-2'} mb-4 font-mono`}>
+      <p className={`text-sm text-[hsl(210,20%,68%)] ${isLarge ? 'line-clamp-3' : 'line-clamp-2'} mb-4 font-mono`}>
         {snippet(entry.content)}
       </p>
 

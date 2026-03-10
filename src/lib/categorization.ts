@@ -33,9 +33,24 @@ export function extractKeywords(text: string): string[] {
   const englishWords = normalized.match(/[a-z]{2,}/g) || [];
   tokens.push(...englishWords);
   
-  // Extract Chinese character sequences (2+ chars)
+  // Extract Chinese character sequences (2-5 chars for keyword quality)
   const chineseSeqs = normalized.match(/[\u4e00-\u9fff]{2,}/g) || [];
-  tokens.push(...chineseSeqs);
+  // Trim long sequences to max 5 chars, also add 2-char sub-segments for better matching
+  for (const seq of chineseSeqs) {
+    if (seq.length <= 5) {
+      tokens.push(seq);
+    } else {
+      // Extract 2-4 char sub-segments from long sequences
+      for (let i = 0; i < seq.length - 1 && tokens.length < 20; i++) {
+        const sub2 = seq.slice(i, i + 2);
+        const sub3 = seq.slice(i, Math.min(i + 3, seq.length));
+        const sub4 = seq.slice(i, Math.min(i + 4, seq.length));
+        if (sub2.length >= 2 && !STOP_WORDS.has(sub2)) tokens.push(sub2);
+        if (sub3.length >= 3 && !STOP_WORDS.has(sub3)) tokens.push(sub3);
+        if (sub4.length >= 4 && sub4.length <= 5 && !STOP_WORDS.has(sub4)) tokens.push(sub4);
+      }
+    }
+  }
   
   // Also extract individual Chinese chars for short titles
   const chineseChars = normalized.match(/[\u4e00-\u9fff]/g) || [];

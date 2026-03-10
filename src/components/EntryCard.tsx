@@ -133,12 +133,12 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
           </span>
         )}
         <div className="ml-auto">
-          <Activity className="h-4 w-4 text-[hsl(180,100%,50%/0.5)]" />
+          <Activity className="h-4 w-4 text-[hsl(180,100%,50%/0.7)]" />
         </div>
       </div>
 
       {/* Category + tags */}
-      <div className="flex items-center gap-1.5 mb-2 text-[10px] tracking-widest text-[hsl(180,80%,60%/0.6)] uppercase font-mono">
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] tracking-widest text-[hsl(180,80%,60%)] uppercase font-mono">
         <span>{entry.categories?.name || '未知分类'}</span>
         {tags.slice(0, 2).map((t, i) => (
           <span key={i}>· {t}</span>
@@ -151,7 +151,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       </h3>
 
       {/* Snippet */}
-      <p className={`text-sm text-[hsl(210,20%,55%)] ${isLarge ? 'line-clamp-3' : 'line-clamp-2'} mb-4 font-mono`}>
+      <p className={`text-sm text-[hsl(210,20%,68%)] ${isLarge ? 'line-clamp-3' : 'line-clamp-2'} mb-4 font-mono`}>
         {snippet(entry.content)}
       </p>
 
@@ -173,11 +173,11 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
             </span>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-[hsl(210,20%,45%)] uppercase tracking-widest">完成度</p>
+            <p className="text-[10px] text-[hsl(210,20%,60%)] uppercase tracking-widest">完成度</p>
           </div>
           <div className="ml-auto text-right">
             <p className="text-3xl font-black text-[hsl(180,100%,60%)] font-mono tracking-tight">{reads}</p>
-            <p className="text-[10px] text-[hsl(210,20%,45%)] uppercase tracking-widest">READS</p>
+            <p className="text-[10px] text-[hsl(210,20%,60%)] uppercase tracking-widest">READS</p>
           </div>
         </div>
       )}
@@ -186,7 +186,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       {!isLarge && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] uppercase tracking-widest text-[hsl(210,20%,45%)] font-mono">PROGRESS</span>
+            <span className="text-[10px] uppercase tracking-widest text-[hsl(210,20%,60%)] font-mono">PROGRESS</span>
             <span className="text-[10px] font-bold text-[hsl(180,100%,60%)]">{progress}%</span>
           </div>
           <div className="h-1 bg-[hsl(220,30%,15%)] rounded-full overflow-hidden">
@@ -196,18 +196,18 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       )}
 
       {/* Bottom: timestamp + status + reads */}
-      <div className="flex items-center justify-between border-t border-[hsl(180,100%,50%/0.1)] pt-3">
+      <div className="flex items-center justify-between border-t border-[hsl(180,100%,50%/0.15)] pt-3">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-[hsl(180,80%,50%)] animate-pulse-cyber">●</span>
-          <span className="text-[hsl(180,80%,50%)] text-[10px] font-mono uppercase tracking-wider">
+          <span className="text-[10px] text-[hsl(180,80%,55%)] animate-pulse-cyber">●</span>
+          <span className="text-[hsl(180,80%,55%)] text-[10px] font-mono uppercase tracking-wider">
             ACTIVE
           </span>
-          <span className="text-[10px] text-[hsl(210,20%,40%)] font-mono">
+          <span className="text-[10px] text-[hsl(210,20%,58%)] font-mono">
             {format(new Date(entry.created_at), 'yyyy-MM-dd · HH:mm')}
           </span>
         </div>
         {!isLarge && (
-          <div className="flex items-center gap-1.5 text-[hsl(210,20%,45%)]">
+          <div className="flex items-center gap-1.5 text-[hsl(210,20%,60%)]">
             <Activity className="h-3 w-3" />
             <span className="text-[10px] font-mono">{reads}</span>
           </div>

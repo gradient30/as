@@ -165,15 +165,15 @@ const Index = () => {
               </div>
               <div>
                 <h2 className="text-xs font-black tracking-[0.2em] text-[hsl(0,0%,85%)] uppercase font-mono">KNOWLEDGE</h2>
-                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.5)] font-mono">NEURAL ARCHIVE v2.0</p>
+                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.7)] font-mono">NEURAL ARCHIVE v2.0</p>
               </div>
             </div>
             <div className="flex items-center gap-6 text-[11px] font-mono tracking-wider">
               <span className="hidden sm:flex items-center gap-1.5 text-[hsl(180,100%,60%)]">
                 <Wifi className="h-3 w-3" /> ONLINE
               </span>
-              <span className="hidden md:inline text-[hsl(0,0%,60%)]">{String(totalCount).padStart(2, '0')}</span>
-              <span className="hidden md:inline text-[hsl(0,0%,60%)]">100%</span>
+              <span className="hidden md:inline text-[hsl(0,0%,75%)]">{String(totalCount).padStart(2, '0')}</span>
+              <span className="hidden md:inline text-[hsl(0,0%,75%)]">100%</span>
               <span className="text-[hsl(180,100%,60%)] text-base font-black tracking-widest cyber-glow">{currentTime}</span>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
@@ -185,7 +185,7 @@ const Index = () => {
           <header className="container mx-auto px-4 pt-8 pb-4">
             <div className="flex items-end justify-between mb-6">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.6)] font-mono mb-2 flex items-center gap-2">
+                <p className="text-[11px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.8)] font-mono mb-2 flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[hsl(180,100%,50%)] animate-pulse-cyber" />
                   PERSONAL KNOWLEDGE SYSTEM
                 </p>
@@ -206,7 +206,7 @@ const Index = () => {
                     <p className={`text-2xl font-black font-mono ${s.highlight ? 'text-[hsl(180,100%,60%)]' : 'text-[hsl(0,0%,85%)]'}`}>
                       {String(s.n).padStart(2, '0')}
                     </p>
-                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,45%)] font-mono">{s.label}</p>
+                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,60%)] font-mono">{s.label}</p>
                   </div>
                 ))}
               </div>
@@ -277,16 +277,16 @@ const Index = () => {
 
         {/* Search */}
         <div className={`relative ${style === 'bento-glass' ? 'border border-[hsl(180,100%,50%/0.2)] bg-[hsl(220,40%,8%)] backdrop-blur' : style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.5)]' : 'text-muted-foreground'}`} />
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.7)]' : 'text-muted-foreground'}`} />
           <Input
             placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,80%)] placeholder:text-[hsl(210,20%,35%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
+            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,90%)] placeholder:text-[hsl(210,20%,50%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
           {style === 'bento-glass' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,35%)]">
-              <kbd className="text-[10px] font-mono border border-[hsl(220,30%,25%)] px-1.5 py-0.5">⌘K</kbd>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,50%)]">
+              <kbd className="text-[10px] font-mono border border-[hsl(220,30%,30%)] px-1.5 py-0.5">⌘K</kbd>
             </div>
           )}
         </div>
@@ -359,11 +359,11 @@ const Index = () => {
         <footer className="fixed bottom-0 left-0 right-0 border-t border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.95] backdrop-blur-sm z-40">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between text-[10px] font-mono tracking-[0.15em]">
             <div className="flex items-center gap-6">
-              <span className="text-[hsl(210,20%,45%)]">STATUS: <span className="text-[hsl(120,80%,50%)] italic">OPERATIONAL</span></span>
-              <span className="text-[hsl(210,20%,45%)]">NOTES: <span className="text-[hsl(0,0%,80%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
-              <span className="hidden sm:inline text-[hsl(210,20%,45%)]">LAST SYNC: <span className="text-[hsl(180,80%,50%)]">{currentTime}</span></span>
+              <span className="text-[hsl(210,20%,60%)]">STATUS: <span className="text-[hsl(120,80%,55%)] italic">OPERATIONAL</span></span>
+              <span className="text-[hsl(210,20%,60%)]">NOTES: <span className="text-[hsl(0,0%,85%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
+              <span className="hidden sm:inline text-[hsl(210,20%,60%)]">LAST SYNC: <span className="text-[hsl(180,80%,55%)]">{currentTime}</span></span>
             </div>
-            <span className="text-[hsl(210,20%,45%)]">STORAGE: <span className="text-[hsl(180,100%,50%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
+            <span className="text-[hsl(210,20%,60%)]">STORAGE: <span className="text-[hsl(180,100%,55%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
           </div>
         </footer>
       )}
@@ -450,7 +450,7 @@ function ViewTabs({ viewMode, setViewMode, variant }: {
           className={`px-4 py-1.5 text-xs font-mono tracking-wider transition-all border ${
             viewMode === t.key
               ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)]'
+              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)]'
           }`}
         >
           {t.label}
@@ -572,7 +572,7 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
         className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
           !categoryFilter
             ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-            : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+             : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
         }`}
         onClick={() => setCategoryFilter(undefined)}
       >
@@ -584,7 +584,7 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
           className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
             categoryFilter === cat.id
               ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
           }`}
           onClick={() => setCategoryFilter(cat.id)}
         >

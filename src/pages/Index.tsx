@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import logoFish from '@/assets/logo-fish.png';
-import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
+import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility, useRecordView, useSmartCategoryEntries, isSmartCategory } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { useLayoutStyle } from '@/hooks/useLayoutStyle';
@@ -60,11 +60,14 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
   const { style, setStyle, drawerSide, setDrawerSide } = useLayoutStyle();
-  const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
+  const isSmartFilter = isSmartCategory(categoryFilter);
+  const { data: entries, isLoading: entriesLoading } = useEntries(isSmartFilter ? undefined : categoryFilter, { showAll: isGlobalAdmin });
+  const { data: smartEntries, isLoading: smartLoading } = useSmartCategoryEntries(isSmartFilter ? categoryFilter : undefined);
   const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
   const toggleVisibility = useToggleEntryVisibility();
+  const recordView = useRecordView();
   const authorToken = getAuthorToken();
   const { dark, toggle: toggleDark } = useDarkMode();
 
@@ -84,8 +87,11 @@ const Index = () => {
     return false;
   };
 
+  const activeEntries = isSmartFilter ? smartEntries : entries;
+  const activeLoading = isSmartFilter ? smartLoading : entriesLoading;
+
   const filteredEntries = useMemo(() => {
-    let result = entries;
+    let result = activeEntries;
     if (!result) return result;
     // View mode filter
     if (viewMode === 'mine') {
@@ -99,7 +105,7 @@ const Index = () => {
       );
     }
     return result;
-  }, [entries, searchQuery, viewMode, authorToken, user]);
+  }, [activeEntries, searchQuery, viewMode, authorToken, user]);
 
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 
@@ -121,13 +127,13 @@ const Index = () => {
   };
 
   const entryCount = filteredEntries?.length || 0;
-  const totalCount = entries?.length || 0;
-  const todayCount = entries?.filter(e => {
+  const totalCount = activeEntries?.length || 0;
+  const todayCount = activeEntries?.filter(e => {
     const d = new Date(e.created_at);
     const now = new Date();
     return d.toDateString() === now.toDateString();
   }).length || 0;
-  const myCount = entries?.filter(e => isOwnEntry(e)).length || 0;
+  const myCount = activeEntries?.filter(e => isOwnEntry(e)).length || 0;
 
   // Current time for cyberpunk display
   const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false }));
@@ -167,7 +173,7 @@ const Index = () => {
 
         <CyberLayout
           entries={filteredEntries}
-          entriesLoading={entriesLoading}
+          entriesLoading={activeLoading}
           categories={categories}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
@@ -312,7 +318,7 @@ const Index = () => {
         )}
 
         {/* Entry grid */}
-        {entriesLoading ? (
+        {activeLoading ? (
           <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={
@@ -330,7 +336,7 @@ const Index = () => {
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
-                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); }}
+                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); recordView.mutate(entry.id); }}
                 layoutStyle={style}
                 index={i}
               />

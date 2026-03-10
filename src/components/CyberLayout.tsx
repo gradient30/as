@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useToggleEntryVisibility } from '@/hooks/useEntries';
+import { useToggleEntryVisibility, useRecordView } from '@/hooks/useEntries';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { toast } from 'sonner';
@@ -444,6 +444,12 @@ export function CyberLayout({
   totalCount, currentTime, user, headerActions,
 }: CyberLayoutProps) {
   const l1Cats = categories?.filter(c => !c.parent_id && c.is_system) || [];
+  const recordView = useRecordView();
+
+  const handleSelectEntry = useCallback((entry: EntryWithCategory) => {
+    setSelectedEntry(entry);
+    recordView.mutate(entry.id);
+  }, [setSelectedEntry, recordView]);
 
   // Flatten entries for virtual scrolling when no category grouping
   const flatEntries = useMemo(() => entries || [], [entries]);
@@ -584,7 +590,7 @@ export function CyberLayout({
             <VirtualizedEntryList
               entries={flatEntries}
               selectedEntry={selectedEntry}
-              onSelect={setSelectedEntry}
+              onSelect={handleSelectEntry}
             />
           ) : filteredGroups.length > 0 ? (
             <div className="flex-1 overflow-y-auto divide-y divide-[hsl(var(--cyber-border-subtle))]">
@@ -594,7 +600,7 @@ export function CyberLayout({
                   categoryName={group.name}
                   entries={group.entries}
                   selectedEntry={selectedEntry}
-                  onSelect={setSelectedEntry}
+                  onSelect={handleSelectEntry}
                   defaultOpen={filteredGroups.length <= 3 || group.entries.some(e => e.id === selectedEntry?.id)}
                 />
               ))}

@@ -27,19 +27,24 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
   const submitEntry = useSubmitEntry();
   const { user } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doSubmit = async (privateOverride?: boolean) => {
     if (!title.trim() || !content.trim()) return;
+    const priv = privateOverride ?? isPrivate;
 
     await submitEntry.mutateAsync({
       title: title.trim(),
       content: content.trim(),
-      is_private: isPrivate,
+      is_private: priv,
     });
     setTitle('');
     setContent('');
     setIsPrivate(false);
     onOpenChange(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    doSubmit();
   };
 
   return (

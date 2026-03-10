@@ -260,11 +260,7 @@ const Index = () => {
 
         {/* Entry grid/list */}
         {entriesLoading ? (
-          <div className={style === 'dark-editorial' ? 'space-y-2' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className={style === 'dark-editorial' ? 'h-16 w-full' : 'h-48 rounded-xl'} />
-            ))}
-          </div>
+          <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={
             style === 'dark-editorial'

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Pencil, Trash2, EyeOff, Eye, User } from 'lucide-react';
+import { Pencil, Trash2, EyeOff, Eye, User, FileText, Tag } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
 interface EntryCardProps {

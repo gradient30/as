@@ -48,6 +48,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [manageMode, setManageMode] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();

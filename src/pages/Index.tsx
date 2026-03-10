@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import logoFish from '@/assets/logo-fish.png';
 import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
@@ -227,7 +228,8 @@ const Index = () => {
         <header className="container mx-auto px-4 pt-6 pb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <h1 className="text-lg font-black uppercase tracking-widest">Knowledge</h1>
+              <img src={logoFish} alt="openwz" className="h-7 w-7 object-contain" />
+              <h1 className="text-lg font-black uppercase tracking-widest">openwz</h1>
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="editorial" />
             </div>
             <div className="flex items-center gap-3">
@@ -258,9 +260,9 @@ const Index = () => {
         <header className="container mx-auto px-4 pt-6 pb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🧠</span>
+              <img src={logoFish} alt="openwz" className="h-8 w-8 object-contain" />
               <div>
-                <h1 className="text-xl font-black uppercase tracking-wider">Knowledge</h1>
+                <h1 className="text-xl font-black uppercase tracking-wider">openwz</h1>
                 <p className="text-[10px] text-muted-foreground">个人知识库</p>
               </div>
             </div>

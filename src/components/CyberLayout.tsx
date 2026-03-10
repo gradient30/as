@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import logoFish from '@/assets/logo-fish.png';
 import { format } from 'date-fns';
 import { Search, Plus, Command, X, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Share2, EyeOff, Eye, Trash2, MessageCircle, ExternalLink, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -473,11 +474,9 @@ export function CyberLayout({
       {/* Top nav bar */}
       <nav className="px-4 py-2.5 flex items-center justify-between border-b border-[hsl(var(--cyber-border))] flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-full border border-[hsl(var(--cyber-accent)/0.4)] flex items-center justify-center">
-            <Command className="h-3.5 w-3.5 text-[hsl(var(--cyber-accent))]" />
-          </div>
+          <img src={logoFish} alt="openwz" className="h-7 w-7 object-contain" />
           <div>
-            <h2 className="text-[11px] font-black tracking-[0.2em] text-[hsl(var(--cyber-text))] uppercase font-mono">KNOWLEDGE</h2>
+            <h2 className="text-[11px] font-black tracking-[0.2em] text-[hsl(var(--cyber-text))] uppercase font-mono">OPENWZ</h2>
             <p className="text-[8px] tracking-[0.15em] text-[hsl(var(--cyber-accent)/0.6)] font-mono">个人知识库</p>
           </div>
         </div>

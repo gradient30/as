@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, Tags } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, Tags, Wifi, Command } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {

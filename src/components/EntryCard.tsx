@@ -177,7 +177,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
           </div>
           <div className="ml-auto text-right">
             <p className="text-3xl font-black text-[hsl(180,100%,60%)] font-mono tracking-tight">{reads}</p>
-            <p className="text-[10px] text-[hsl(210,20%,45%)] uppercase tracking-widest">READS</p>
+            <p className="text-[10px] text-[hsl(210,20%,60%)] uppercase tracking-widest">READS</p>
           </div>
         </div>
       )}

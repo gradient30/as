@@ -118,16 +118,25 @@ const Index = () => {
   };
 
   const entryCount = filteredEntries?.length || 0;
-  const todayCount = filteredEntries?.filter(e => {
+  const totalCount = entries?.length || 0;
+  const todayCount = entries?.filter(e => {
     const d = new Date(e.created_at);
     const now = new Date();
     return d.toDateString() === now.toDateString();
   }).length || 0;
-  const myCount = filteredEntries?.filter(e => isOwnEntry(e)).length || 0;
+  const myCount = entries?.filter(e => isOwnEntry(e)).length || 0;
+
+  // Current time for cyberpunk display
+  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false }));
+  // Update time every second for bento-glass
+  useState(() => {
+    const interval = setInterval(() => setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false })), 1000);
+    return () => clearInterval(interval);
+  });
 
   // Background classes per style
   const bgClass = style === 'bento-glass'
-    ? 'min-h-screen bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-teal-400/5 dark:from-cyan-900/30 dark:via-blue-950/20 dark:to-background'
+    ? 'min-h-screen bg-[hsl(220,50%,5%)]'
     : style === 'dark-editorial'
     ? 'min-h-screen bg-background'
     : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';
@@ -135,7 +144,7 @@ const Index = () => {
   return (
     <div className={bgClass}>
       {/* Style Switcher Bar */}
-      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <div className={`border-b ${style === 'bento-glass' ? 'border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.9]' : 'border-border/50 bg-background/80'} backdrop-blur-sm`}>
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
           <StyleSwitcher current={style} onChange={setStyle} />
           <div className="flex items-center gap-2">
@@ -146,23 +155,66 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Header — varies by style */}
+      {/* ===== BENTO GLASS: Cyberpunk Header ===== */}
       {style === 'bento-glass' && (
-        <header className="container mx-auto px-4 pt-6 pb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-0.5">知 识 库</p>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight">My Brain</h1>
-            </div>
+        <>
+          {/* Top nav bar */}
+          <nav className="container mx-auto px-4 py-3 flex items-center justify-between border-b border-[hsl(180,100%,50%/0.1)]">
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">{entryCount} 条</Badge>
+              <div className="h-8 w-8 rounded-full border border-[hsl(180,100%,50%/0.4)] flex items-center justify-center">
+                <Command className="h-4 w-4 text-[hsl(180,100%,60%)]" />
+              </div>
+              <div>
+                <h2 className="text-xs font-black tracking-[0.2em] text-[hsl(0,0%,85%)] uppercase font-mono">KNOWLEDGE</h2>
+                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.5)] font-mono">NEURAL ARCHIVE v2.0</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 text-[11px] font-mono tracking-wider">
+              <span className="hidden sm:flex items-center gap-1.5 text-[hsl(180,100%,60%)]">
+                <Wifi className="h-3 w-3" /> ONLINE
+              </span>
+              <span className="hidden md:inline text-[hsl(0,0%,60%)]">{String(totalCount).padStart(2, '0')}</span>
+              <span className="hidden md:inline text-[hsl(0,0%,60%)]">100%</span>
+              <span className="text-[hsl(180,100%,60%)] text-base font-black tracking-widest cyber-glow">{currentTime}</span>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
                 setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
             </div>
-          </div>
-          <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
-        </header>
+          </nav>
+
+          {/* Hero section */}
+          <header className="container mx-auto px-4 pt-8 pb-4">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.6)] font-mono mb-2 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(180,100%,50%)] animate-pulse-cyber" />
+                  PERSONAL KNOWLEDGE SYSTEM
+                </p>
+                <h1 className="text-5xl md:text-6xl font-black tracking-tight text-[hsl(180,100%,60%)] cyber-glow uppercase">
+                  MY BRAIN
+                </h1>
+              </div>
+              {/* Stat boxes */}
+              <div className="flex gap-3">
+                {[
+                  { n: totalCount, label: 'TOTAL', highlight: false },
+                  { n: todayCount, label: 'TODAY', highlight: false },
+                  { n: myCount, label: 'MINE', highlight: true },
+                ].map(s => (
+                  <div key={s.label}
+                    className={`text-center px-4 py-2 border ${s.highlight ? 'border-[hsl(180,100%,50%/0.5)] bg-[hsl(180,100%,50%/0.05)]' : 'border-[hsl(220,30%,25%)]'}`}
+                  >
+                    <p className={`text-2xl font-black font-mono ${s.highlight ? 'text-[hsl(180,100%,60%)]' : 'text-[hsl(0,0%,85%)]'}`}>
+                      {String(s.n).padStart(2, '0')}
+                    </p>
+                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,45%)] font-mono">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
+          </header>
+        </>
       )}
 
       {style === 'dark-editorial' && (

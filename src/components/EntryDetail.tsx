@@ -20,6 +20,8 @@ import { useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { LayoutStyle } from '@/hooks/useLayoutStyle';
 import { getCardColor } from '@/hooks/useLayoutStyle';
 
+type SheetSide = 'left' | 'right' | 'top' | 'bottom';
+
 interface EntryDetailProps {
   entry: EntryWithCategory | null;
   open: boolean;
@@ -29,6 +31,7 @@ interface EntryDetailProps {
   onDelete?: () => void;
   layoutStyle?: LayoutStyle;
   cardIndex?: number;
+  drawerSide?: SheetSide;
 }
 
 function getShareUrl(entry: EntryWithCategory) {

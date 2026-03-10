@@ -187,27 +187,56 @@ const Index = () => {
         </div>
 
         {/* Category filters */}
-        {categories && categories.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              variant={!categoryFilter ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => setCategoryFilter(undefined)}
-            >
-              全部
-            </Badge>
-            {categories.map((cat) => (
-              <Badge
-                key={cat.id}
-                variant={categoryFilter === cat.id ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setCategoryFilter(cat.id)}
-              >
-                {cat.name}
-              </Badge>
-            ))}
-          </div>
-        )}
+        {categories && categories.length > 0 && (() => {
+          const l1Cats = categories.filter((c: CategoryRow) => !c.parent_id && c.is_system);
+          const getChildren = (pid: string) => categories.filter((c: CategoryRow) => c.parent_id === pid);
+          return (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  variant={!categoryFilter ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setCategoryFilter(undefined)}
+                >
+                  全部
+                </Badge>
+                {l1Cats.map((cat: CategoryRow) => (
+                  <Badge
+                    key={cat.id}
+                    variant={categoryFilter === cat.id ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => setCategoryFilter(cat.id)}
+                  >
+                    {cat.name}
+                  </Badge>
+                ))}
+              </div>
+              {/* L2 sub-categories when L1 is selected */}
+              {categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) && (
+                <div className="flex flex-wrap gap-2 pl-4">
+                  <Badge
+                    variant={categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) ? 'default' : 'outline'}
+                    className="cursor-pointer text-xs"
+                    onClick={() => {/* already filtering by L1 */}}
+                  >
+                    全部子分类
+                  </Badge>
+                  {getChildren(categoryFilter).map((sub: CategoryRow) => (
+                    <Badge
+                      key={sub.id}
+                      variant={categoryFilter === sub.id ? 'default' : 'outline'}
+                      className="cursor-pointer text-xs"
+                      onClick={() => setCategoryFilter(sub.id)}
+                    >
+                      {sub.name}
+                      {!sub.is_approved && <span className="ml-1 opacity-60">（待审核）</span>}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Admin panels for managed categories */}
         {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (

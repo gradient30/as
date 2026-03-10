@@ -432,9 +432,9 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Badge
+          <Badge
           variant={!categoryFilter ? 'default' : 'outline'}
-          className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+          className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
           onClick={() => setCategoryFilter(undefined)}
         >
           全部
@@ -443,7 +443,7 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
           <Badge
             key={cat.id}
             variant={categoryFilter === cat.id ? 'default' : 'outline'}
-            className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+            className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
             onClick={() => setCategoryFilter(cat.id)}
           >
             {cat.name}

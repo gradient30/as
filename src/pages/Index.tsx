@@ -59,7 +59,7 @@ const Index = () => {
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
-  const { style, setStyle } = useLayoutStyle();
+  const { style, setStyle, drawerSide, setDrawerSide } = useLayoutStyle();
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
   const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();

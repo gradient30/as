@@ -277,23 +277,36 @@ const Index = () => {
         )}
 
         {/* Search */}
-        <div className={`relative ${style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className={`relative ${style === 'bento-glass' ? 'border border-[hsl(180,100%,50%/0.2)] bg-[hsl(220,40%,8%)] backdrop-blur' : style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.5)]' : 'text-muted-foreground'}`} />
           <Input
-            placeholder="搜索知识..."
+            placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-9 ${style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
+            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,80%)] placeholder:text-[hsl(210,20%,35%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
+          {style === 'bento-glass' && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,35%)]">
+              <kbd className="text-[10px] font-mono border border-[hsl(220,30%,25%)] px-1.5 py-0.5">⌘K</kbd>
+            </div>
+          )}
         </div>
 
         {/* Category filters */}
-        <CategoryFilters
-          categories={categories}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          style={style}
-        />
+        <div className={style === 'bento-glass' ? 'flex items-center justify-between' : ''}>
+          <CategoryFilters
+            categories={categories}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            style={style}
+          />
+          {style === 'bento-glass' && (
+            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(120,100%,50%)] animate-pulse-cyber" />
+              <span className="text-[hsl(120,80%,50%)]">LIVE SYNC</span>
+            </div>
+          )}
+        </div>
 
         {/* Admin panels */}
         {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
@@ -302,9 +315,6 @@ const Index = () => {
             categoryName={adminCategories.find(c => c.id === categoryFilter)?.name || ''}
           />
         )}
-
-        {/* Editorial table header */}
-        {/* Editorial section removed — now uses card grid */}
 
         {/* Entry grid/list */}
         {entriesLoading ? (
@@ -334,16 +344,30 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h2 className="text-lg font-medium text-muted-foreground mb-1">暂无知识条目</h2>
-            <p className="text-sm text-muted-foreground/70 mb-4">成为第一个录入知识的人吧！</p>
-            <Button onClick={() => setSubmitOpen(true)}>
+          <div className={`flex flex-col items-center justify-center py-20 text-center ${style === 'bento-glass' ? 'text-[hsl(210,20%,45%)]' : ''}`}>
+            <BookOpen className={`h-12 w-12 mb-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.3)]' : 'text-muted-foreground/40'}`} />
+            <h2 className={`text-lg font-medium mb-1 ${style === 'bento-glass' ? 'text-[hsl(0,0%,70%)] font-mono' : 'text-muted-foreground'}`}>暂无知识条目</h2>
+            <p className={`text-sm mb-4 ${style === 'bento-glass' ? 'text-[hsl(210,20%,35%)]' : 'text-muted-foreground/70'}`}>成为第一个录入知识的人吧！</p>
+            <Button onClick={() => setSubmitOpen(true)} className={style === 'bento-glass' ? 'bg-[hsl(180,100%,50%)] text-[hsl(220,50%,5%)] hover:bg-[hsl(180,100%,60%)] font-mono font-bold' : ''}>
               <Plus className="h-4 w-4" />录入知识
             </Button>
           </div>
         )}
       </main>
+
+      {/* Cyberpunk Status Bar */}
+      {style === 'bento-glass' && (
+        <footer className="fixed bottom-0 left-0 right-0 border-t border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.95] backdrop-blur-sm z-40">
+          <div className="container mx-auto px-4 py-2 flex items-center justify-between text-[10px] font-mono tracking-[0.15em]">
+            <div className="flex items-center gap-6">
+              <span className="text-[hsl(210,20%,45%)]">STATUS: <span className="text-[hsl(120,80%,50%)] italic">OPERATIONAL</span></span>
+              <span className="text-[hsl(210,20%,45%)]">NOTES: <span className="text-[hsl(0,0%,80%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
+              <span className="hidden sm:inline text-[hsl(210,20%,45%)]">LAST SYNC: <span className="text-[hsl(180,80%,50%)]">{currentTime}</span></span>
+            </div>
+            <span className="text-[hsl(210,20%,45%)]">STORAGE: <span className="text-[hsl(180,100%,50%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
+          </div>
+        </footer>
+      )}
 
       {/* Dialogs */}
       <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />

@@ -1,10 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Search, Plus, Command, X, RefreshCw, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Folder } from 'lucide-react';
+import { Search, Plus, Command, X, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Share2, EyeOff, Eye, Trash2, MessageCircle, ExternalLink, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { toast } from 'sonner';
@@ -32,6 +36,19 @@ function extractHeadings(content: string): { level: number; text: string }[] {
     .filter(Boolean) as { level: number; text: string }[];
 }
 
+function getShareUrl(entry: EntryWithCategory) {
+  let url = `${window.location.origin}/?entry=${entry.id}`;
+  if (entry.is_private && entry.share_token) {
+    url += `&share=${entry.share_token}`;
+  }
+  return url;
+}
+
+function getShareText(entry: EntryWithCategory) {
+  const snippet = entry.content.replace(/[#*`~\[\]>!|-]/g, '').replace(/\n/g, ' ').trim().slice(0, 100);
+  return `【${entry.title}】${snippet}...`;
+}
+
 // ===== Compact Entry Item =====
 function EntryListItem({ entry, isSelected, onClick }: {
   entry: EntryWithCategory;
@@ -52,6 +69,7 @@ function EntryListItem({ entry, isSelected, onClick }: {
         <h4 className="text-xs font-bold text-[hsl(var(--cyber-text))] line-clamp-1 flex items-center gap-1.5">
           <span className="text-sm">{getCategoryEmoji(entry.categories?.name)}</span>
           {entry.title}
+          {entry.is_private && <EyeOff className="h-3 w-3 text-[hsl(var(--cyber-accent)/0.5)] flex-shrink-0" />}
         </h4>
         <span className="text-[9px] text-[hsl(var(--cyber-text-dim))] font-mono ml-2 flex-shrink-0">
           {format(new Date(entry.created_at), 'HH:mm')}
@@ -60,6 +78,46 @@ function EntryListItem({ entry, isSelected, onClick }: {
       <p className="text-[10px] text-[hsl(var(--cyber-text-muted))] line-clamp-1 pl-5">
         {snippet.slice(0, 80)}
       </p>
+    </div>
+  );
+}
+
+// ===== Virtualized Entry List =====
+function VirtualizedEntryList({ entries, selectedEntry, onSelect }: {
+  entries: EntryWithCategory[];
+  selectedEntry: EntryWithCategory | null;
+  onSelect: (e: EntryWithCategory) => void;
+}) {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 52,
+    overscan: 10,
+  });
+
+  return (
+    <div ref={parentRef} className="flex-1 overflow-y-auto">
+      <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+        {virtualizer.getVirtualItems().map(virtualItem => (
+          <div
+            key={virtualItem.key}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualItem.start}px)`,
+            }}
+          >
+            <EntryListItem
+              entry={entries[virtualItem.index]}
+              isSelected={selectedEntry?.id === entries[virtualItem.index].id}
+              onClick={() => onSelect(entries[virtualItem.index])}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -85,40 +143,82 @@ function CategoryGroup({ categoryName, entries, selectedEntry, onSelect, default
         <span className="uppercase flex-1 text-left">{categoryName}</span>
         <span className="text-[hsl(var(--cyber-accent)/0.6)] font-bold">{entries.length}</span>
       </button>
-      {open && (
-        <div>
-          {entries.map(entry => (
-            <EntryListItem
-              key={entry.id}
-              entry={entry}
-              isSelected={selectedEntry?.id === entry.id}
-              onClick={() => onSelect(entry)}
-            />
-          ))}
-        </div>
-      )}
+      {open && entries.map(entry => (
+        <EntryListItem
+          key={entry.id}
+          entry={entry}
+          isSelected={selectedEntry?.id === entry.id}
+          onClick={() => onSelect(entry)}
+        />
+      ))}
     </div>
   );
 }
 
 // ===== Detail View =====
-function DetailView({ entry, canManage, onEdit, onClose }: {
+function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
   entry: EntryWithCategory;
   canManage: boolean;
   onEdit: () => void;
   onClose: () => void;
+  onDelete: () => void;
 }) {
   const wordCount = entry.content.length;
   const readTime = Math.max(1, Math.ceil(wordCount / 400));
   const reads = getReadCount(entry.id);
   const [fontSize, setFontSize] = useState(1);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const toggleVisibility = useToggleEntryVisibility();
+
+  const shareUrl = getShareUrl(entry);
+  const shareText = getShareText(entry);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(entry.content);
     toast.success('内容已复制');
   };
 
-  const fontSizes = ['prose-sm', 'prose-base', 'prose-lg', 'prose-xl'];
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success('链接已复制到剪贴板');
+      setTimeout(() => setCopied(false), 2000);
+    } catch { toast.error('复制失败'); }
+  };
+
+  const handleCopyAll = async () => {
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      toast.success('内容和链接已复制');
+    } catch { toast.error('复制失败'); }
+  };
+
+  const shareToWeChat = () => {
+    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+      toast.success('内容已复制，请打开微信粘贴分享');
+    });
+  };
+
+  const shareToQQ = () => {
+    const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(entry.title)}&summary=${encodeURIComponent(shareText)}`;
+    window.open(qqUrl, '_blank', 'width=600,height=500');
+  };
+
+  const shareToXiaohongshu = () => {
+    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+      toast.success('内容已复制，正在打开小红书...');
+      window.open('https://www.xiaohongshu.com', '_blank');
+    });
+  };
+
+  const handleToggleVisibility = () => {
+    toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private });
+  };
+
+  // Font size: use inline style for reliable scaling
+  const fontSizeValues = [14, 16, 18, 20];
 
   return (
     <div className="h-full flex flex-col">
@@ -129,20 +229,75 @@ function DetailView({ entry, canManage, onEdit, onClose }: {
             {entry.categories?.name || '未分类'}
           </span>
           {entry.is_private && (
-            <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 border border-[hsl(var(--cyber-accent)/0.3)] text-[hsl(var(--cyber-accent-text))]">
-              PERSONAL
-            </span>
+            <Badge variant="outline" className="text-[10px] font-mono gap-1 border-[hsl(var(--cyber-accent)/0.3)] text-[hsl(var(--cyber-accent-text))]">
+              <EyeOff className="h-3 w-3" />
+              私密
+            </Badge>
           )}
         </div>
         <div className="flex items-center gap-1">
-          <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" onClick={handleCopy} title="复制">
+          {/* Share */}
+          <Popover open={shareOpen} onOpenChange={setShareOpen}>
+            <PopoverTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" title="分享">
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-3" align="end">
+              <div className="space-y-3">
+                <p className="text-sm font-medium">分享到</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={shareToWeChat}>
+                    <MessageCircle className="h-3.5 w-3.5" />微信
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={shareToQQ}>
+                    QQ
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs" onClick={shareToXiaohongshu}>
+                    小红书
+                  </Button>
+                </div>
+                <div className="space-y-1.5">
+                  <p className="text-xs text-muted-foreground">分享链接</p>
+                  <div className="flex gap-1.5">
+                    <Input value={shareUrl} readOnly className="h-8 text-xs" onFocus={(e) => e.target.select()} />
+                    <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={handleCopyLink}>
+                      {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" className="flex-1 gap-1.5 text-xs" onClick={handleCopyAll}>
+                    <Copy className="h-3.5 w-3.5" />复制内容+链接
+                  </Button>
+                  <Button size="sm" variant="secondary" className="flex-1 gap-1.5 text-xs" onClick={() => window.open(shareUrl, '_blank')}>
+                    <ExternalLink className="h-3.5 w-3.5" />新窗口打开
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" onClick={handleCopy} title="复制内容">
             <Copy className="h-4 w-4" />
           </Button>
+
           {canManage && (
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" onClick={onEdit} title="编辑">
-              <Pencil className="h-4 w-4" />
-            </Button>
+            <>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]"
+                onClick={handleToggleVisibility} disabled={toggleVisibility.isPending}
+                title={entry.is_private ? '设为公开' : '设为私密'}>
+                {entry.is_private ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" onClick={onEdit} title="编辑">
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={onDelete} title="删除">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
           )}
+
           <Button size="icon" variant="ghost" className="h-8 w-8 text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))]" onClick={onClose} title="关闭">
             <X className="h-4 w-4" />
           </Button>
@@ -169,7 +324,7 @@ function DetailView({ entry, canManage, onEdit, onClose }: {
             <button
               key={i}
               onClick={() => setFontSize(i)}
-              className={`w-7 h-7 flex items-center justify-center text-xs font-bold rounded transition-all ${
+              className={`w-7 h-7 flex items-center justify-center font-bold rounded transition-all ${
                 fontSize === i
                   ? 'bg-[hsl(var(--cyber-tag-bg))] text-[hsl(var(--cyber-tag-text))]'
                   : 'text-[hsl(var(--cyber-text-muted))] hover:text-[hsl(var(--cyber-text-secondary))]'
@@ -179,17 +334,18 @@ function DetailView({ entry, canManage, onEdit, onClose }: {
               {label}
             </button>
           ))}
-          <span className="ml-4 text-[10px] text-[hsl(var(--cyber-text-dim))] font-mono">阅读进度 0%</span>
         </div>
 
-        <div className={`${fontSizes[fontSize]} prose-invert max-w-none
-          prose-headings:text-[hsl(var(--cyber-heading))] prose-headings:font-black prose-headings:border-l-2 prose-headings:border-[hsl(var(--cyber-heading))] prose-headings:pl-3
-          prose-p:text-[hsl(var(--cyber-text-secondary))] prose-p:leading-relaxed
-          prose-strong:text-[hsl(var(--cyber-text))]
-          prose-a:text-[hsl(var(--cyber-accent))]
-          prose-code:text-[hsl(var(--cyber-accent-text))]
-          prose-li:text-[hsl(var(--cyber-text-secondary))]
-        `}>
+        <div
+          className="prose prose-invert max-w-none
+            prose-headings:text-[hsl(var(--cyber-heading))] prose-headings:font-black prose-headings:border-l-2 prose-headings:border-[hsl(var(--cyber-heading))] prose-headings:pl-3
+            prose-p:text-[hsl(var(--cyber-text-secondary))] prose-p:leading-relaxed
+            prose-strong:text-[hsl(var(--cyber-text))]
+            prose-a:text-[hsl(var(--cyber-accent))]
+            prose-code:text-[hsl(var(--cyber-accent-text))]
+            prose-li:text-[hsl(var(--cyber-text-secondary))]"
+          style={{ fontSize: `${fontSizeValues[fontSize]}px` }}
+        >
           <MarkdownRenderer content={entry.content} />
         </div>
 
@@ -270,6 +426,7 @@ interface CyberLayoutProps {
   canManageEntry: (e: EntryWithCategory) => boolean;
   isOwnEntry: (e: EntryWithCategory) => boolean;
   onEdit: (e: EntryWithCategory) => void;
+  onDelete: (entryId: string) => void;
   onSubmit: () => void;
   totalCount: number;
   currentTime: string;
@@ -281,34 +438,35 @@ export function CyberLayout({
   entries, entriesLoading, categories, categoryFilter, setCategoryFilter,
   searchQuery, setSearchQuery, viewMode, setViewMode,
   selectedEntry, setSelectedEntry,
-  canManageEntry, isOwnEntry, onEdit, onSubmit,
+  canManageEntry, isOwnEntry, onEdit, onDelete, onSubmit,
   totalCount, currentTime, user, headerActions,
 }: CyberLayoutProps) {
   const l1Cats = categories?.filter(c => !c.parent_id && c.is_system) || [];
+
+  // Flatten entries for virtual scrolling when no category grouping
+  const flatEntries = useMemo(() => entries || [], [entries]);
 
   // Group entries by category
   const groupedEntries = useMemo(() => {
     if (!entries) return [];
     const groups = new Map<string, { name: string; entries: EntryWithCategory[] }>();
-    
     for (const entry of entries) {
       const catName = entry.categories?.name || '未分类';
-      if (!groups.has(catName)) {
-        groups.set(catName, { name: catName, entries: [] });
-      }
+      if (!groups.has(catName)) groups.set(catName, { name: catName, entries: [] });
       groups.get(catName)!.entries.push(entry);
     }
-    
     return Array.from(groups.values());
   }, [entries]);
 
-  // If category filter is active, only show that group
   const filteredGroups = useMemo(() => {
     if (!categoryFilter) return groupedEntries;
     const selectedCat = categories?.find(c => c.id === categoryFilter);
     if (!selectedCat) return groupedEntries;
     return groupedEntries.filter(g => g.name === selectedCat.name);
   }, [groupedEntries, categoryFilter, categories]);
+
+  // Use virtual scrolling when total entries > 100
+  const useVirtual = flatEntries.length > 100;
 
   return (
     <div className="h-[calc(100vh-41px)] flex flex-col cyber-theme">
@@ -411,37 +569,41 @@ export function CyberLayout({
             {entries?.length || 0} DOCUMENTS
           </div>
 
-          {/* Grouped entry list */}
-          <div className="flex-1 overflow-y-auto">
-            {entriesLoading ? (
-              <div className="p-3 space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="space-y-2 animate-pulse">
-                    <Skeleton className="h-4 w-16 bg-[hsl(var(--cyber-border))]" />
-                    <Skeleton className="h-4 w-3/4 bg-[hsl(var(--cyber-border-subtle))]" />
-                    <Skeleton className="h-3 w-full bg-[hsl(var(--cyber-border-subtle))]" />
-                  </div>
-                ))}
-              </div>
-            ) : filteredGroups.length > 0 ? (
-              <div className="divide-y divide-[hsl(var(--cyber-border-subtle))]">
-                {filteredGroups.map(group => (
-                  <CategoryGroup
-                    key={group.name}
-                    categoryName={group.name}
-                    entries={group.entries}
-                    selectedEntry={selectedEntry}
-                    onSelect={setSelectedEntry}
-                    defaultOpen={filteredGroups.length <= 3 || group.entries.some(e => e.id === selectedEntry?.id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="p-6 text-center text-[hsl(var(--cyber-text-dim))] text-xs font-mono">
-                暂无文档
-              </div>
-            )}
-          </div>
+          {/* Entry list - virtual or grouped */}
+          {entriesLoading ? (
+            <div className="p-3 space-y-3 flex-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="space-y-2 animate-pulse">
+                  <Skeleton className="h-4 w-16 bg-[hsl(var(--cyber-border))]" />
+                  <Skeleton className="h-4 w-3/4 bg-[hsl(var(--cyber-border-subtle))]" />
+                  <Skeleton className="h-3 w-full bg-[hsl(var(--cyber-border-subtle))]" />
+                </div>
+              ))}
+            </div>
+          ) : useVirtual ? (
+            <VirtualizedEntryList
+              entries={flatEntries}
+              selectedEntry={selectedEntry}
+              onSelect={setSelectedEntry}
+            />
+          ) : filteredGroups.length > 0 ? (
+            <div className="flex-1 overflow-y-auto divide-y divide-[hsl(var(--cyber-border-subtle))]">
+              {filteredGroups.map(group => (
+                <CategoryGroup
+                  key={group.name}
+                  categoryName={group.name}
+                  entries={group.entries}
+                  selectedEntry={selectedEntry}
+                  onSelect={setSelectedEntry}
+                  defaultOpen={filteredGroups.length <= 3 || group.entries.some(e => e.id === selectedEntry?.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-6 text-center text-[hsl(var(--cyber-text-dim))] text-xs font-mono">
+              暂无文档
+            </div>
+          )}
         </aside>
 
         {/* CENTER */}
@@ -452,6 +614,7 @@ export function CyberLayout({
               canManage={canManageEntry(selectedEntry)}
               onEdit={() => onEdit(selectedEntry)}
               onClose={() => setSelectedEntry(null)}
+              onDelete={() => onDelete(selectedEntry.id)}
             />
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center px-8">

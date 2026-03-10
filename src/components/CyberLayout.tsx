@@ -444,6 +444,12 @@ export function CyberLayout({
   totalCount, currentTime, user, headerActions,
 }: CyberLayoutProps) {
   const l1Cats = categories?.filter(c => !c.parent_id && c.is_system) || [];
+  const recordView = useRecordView();
+
+  const handleSelectEntry = useCallback((entry: EntryWithCategory) => {
+    setSelectedEntry(entry);
+    recordView.mutate(entry.id);
+  }, [setSelectedEntry, recordView]);
 
   // Flatten entries for virtual scrolling when no category grouping
   const flatEntries = useMemo(() => entries || [], [entries]);

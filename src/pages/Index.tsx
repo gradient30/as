@@ -82,12 +82,21 @@ const Index = () => {
   };
 
   const filteredEntries = useMemo(() => {
-    if (!entries || !searchQuery.trim()) return entries;
-    const q = searchQuery.toLowerCase();
-    return entries.filter(
-      (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
-    );
-  }, [entries, searchQuery]);
+    let result = entries;
+    if (!result) return result;
+    // View mode filter
+    if (viewMode === 'mine') {
+      result = result.filter(e => isOwnEntry(e));
+    }
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [entries, searchQuery, viewMode, authorToken, user]);
 
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 

@@ -60,11 +60,14 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
   const { style, setStyle, drawerSide, setDrawerSide } = useLayoutStyle();
-  const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
+  const isSmartFilter = isSmartCategory(categoryFilter);
+  const { data: entries, isLoading: entriesLoading } = useEntries(isSmartFilter ? undefined : categoryFilter, { showAll: isGlobalAdmin });
+  const { data: smartEntries, isLoading: smartLoading } = useSmartCategoryEntries(isSmartFilter ? categoryFilter : undefined);
   const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
   const toggleVisibility = useToggleEntryVisibility();
+  const recordView = useRecordView();
   const authorToken = getAuthorToken();
   const { dark, toggle: toggleDark } = useDarkMode();
 

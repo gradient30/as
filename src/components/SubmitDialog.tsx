@@ -8,10 +8,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useSubmitEntry } from '@/hooks/useEntries';
-import { Loader2 } from 'lucide-react';
+import { Loader2, EyeOff } from 'lucide-react';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
 
 interface SubmitDialogProps {
   open: boolean;
@@ -21,25 +22,31 @@ interface SubmitDialogProps {
 export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
   const submitEntry = useSubmitEntry();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
 
-    await submitEntry.mutateAsync({ title: title.trim(), content: content.trim() });
+    await submitEntry.mutateAsync({
+      title: title.trim(),
+      content: content.trim(),
+      is_private: isPrivate,
+    });
     setTitle('');
     setContent('');
+    setIsPrivate(false);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>录入知识</DialogTitle>
           <DialogDescription>
-            输入标题和内容，系统将自动分类。相似知识将被智能合并。
+            支持 Markdown 语法，可实时预览。系统将自动分类，相似知识将被智能合并。
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,16 +61,27 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="content">内容</Label>
-            <Textarea
-              id="content"
-              placeholder="详细描述..."
+            <Label>内容</Label>
+            <MarkdownEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={6}
-              required
+              onChange={setContent}
+              placeholder="支持 Markdown 语法，如 **粗体**、*斜体*、`代码`、列表等..."
+              rows={10}
             />
           </div>
+
+          {/* Visibility toggle */}
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div className="flex items-center gap-2">
+              <EyeOff className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">仅自己可见</p>
+                <p className="text-xs text-muted-foreground">开启后该知识仅自己可查看</p>
+              </div>
+            </div>
+            <Switch checked={isPrivate} onCheckedChange={setIsPrivate} />
+          </div>
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消

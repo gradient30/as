@@ -21,10 +21,18 @@ export type EntryWithCategory = {
   contributors: string[];
   created_at: string;
   updated_at: string;
+  is_private: boolean;
+  share_token: string | null;
   categories: { id: string; name: string; slug: string } | null;
 };
 
+function generateShareToken(): string {
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+}
+
 export function useEntries(categoryFilter?: string) {
+  const authorToken = getAuthorToken();
+
   return useQuery({
     queryKey: ['entries', categoryFilter],
     queryFn: async () => {
@@ -40,7 +48,42 @@ export function useEntries(categoryFilter?: string) {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as unknown as EntryWithCategory[];
+
+      // Client-side filter: show public entries + own private entries
+      const entries = (data as unknown as EntryWithCategory[]).filter(
+        (e) => !e.is_private || e.author_token === authorToken
+      );
+
+      return entries;
+    },
+  });
+}
+
+/** Fetch a single entry by ID, optionally with share token for private entries */
+export function useEntryById(entryId?: string, shareToken?: string) {
+  const authorToken = getAuthorToken();
+
+  return useQuery({
+    queryKey: ['entry', entryId, shareToken],
+    enabled: !!entryId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('entries')
+        .select('*, categories(id, name, slug)')
+        .eq('id', entryId!)
+        .single();
+
+      if (error) throw error;
+      const entry = data as unknown as EntryWithCategory;
+
+      // Access check: public, own, or valid share token
+      if (entry.is_private) {
+        if (entry.author_token !== authorToken && entry.share_token !== shareToken) {
+          throw new Error('无权访问该知识');
+        }
+      }
+
+      return entry;
     },
   });
 }
@@ -95,9 +138,12 @@ export function useSubmitEntry() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ title, content }: { title: string; content: string }) => {
+    mutationFn: async ({ title, content, is_private = false }: { title: string; content: string; is_private?: boolean }) => {
       const authorToken = getAuthorToken();
       const keywords = extractKeywords(title + ' ' + content);
+
+      // Generate share token for private entries
+      const shareToken = is_private ? generateShareToken() : null;
 
       // 1. Get all categories
       const { data: categories } = await supabase
@@ -146,12 +192,30 @@ export function useSubmitEntry() {
         });
       }
 
-      // 2. Check similarity with existing entries in the same category
+      // 2. Private entries skip similarity check — create directly
+      if (is_private) {
+        const { error } = await supabase.from('entries').insert({
+          title,
+          content,
+          category_id: categoryId,
+          author_token: authorToken,
+          status: 'approved' as const,
+          contributors: [authorToken],
+          is_private: true,
+          share_token: shareToken,
+        });
+        if (error) throw error;
+        toast.success('私密知识已成功录入！');
+        return;
+      }
+
+      // 3. Check similarity with existing entries in the same category
       const { data: existingEntries } = await supabase
         .from('entries')
         .select('*')
         .eq('category_id', categoryId)
-        .eq('status', 'approved');
+        .eq('status', 'approved')
+        .eq('is_private', false);
 
       let merged = false;
       if (existingEntries && existingEntries.length > 0) {
@@ -160,7 +224,6 @@ export function useSubmitEntry() {
           const similarity = calculateSimilarity(keywords, entryKeywords);
 
           if (similarity >= MERGE_THRESHOLD) {
-            // Check if auto-merge is enabled for this category
             const { data: admins } = await supabase
               .from('category_admins')
               .select('auto_merge_enabled')
@@ -170,7 +233,6 @@ export function useSubmitEntry() {
             const autoMerge = admins?.[0]?.auto_merge_enabled ?? true;
 
             if (autoMerge) {
-              // Auto-merge: append content
               const mergedContent = entry.content + '\n\n---\n\n' + content;
               const contributors = [...new Set([...entry.contributors, authorToken])];
 
@@ -179,7 +241,6 @@ export function useSubmitEntry() {
                 .update({ content: mergedContent, contributors })
                 .eq('id', entry.id);
 
-              // Log merge
               await supabase.from('entry_merges').insert({
                 target_entry_id: entry.id,
                 source_title: title,
@@ -191,13 +252,12 @@ export function useSubmitEntry() {
               toast.success('知识已合并到已有条目中');
               break;
             } else {
-              // Queue for review
               const { error } = await supabase.from('entries').insert({
                 title,
                 content,
                 category_id: categoryId,
                 author_token: authorToken,
-                status: 'pending',
+                status: 'pending' as const,
                 contributors: [authorToken],
               });
               if (error) throw error;
@@ -209,19 +269,18 @@ export function useSubmitEntry() {
         }
       }
 
-      // 3. If not merged, create new entry
+      // 4. If not merged, create new entry
       if (!merged) {
         const { error } = await supabase.from('entries').insert({
           title,
           content,
           category_id: categoryId,
           author_token: authorToken,
-          status: 'approved',
+          status: 'approved' as const,
           contributors: [authorToken],
         });
         if (error) throw error;
 
-        // If this is the first entry in existing category and user is not already admin
         if (!isNewCategory) {
           const { data: admins } = await supabase
             .from('category_admins')
@@ -286,7 +345,7 @@ export function useApproveEntry() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (entryId: string) => {
-      const { error } = await supabase.from('entries').update({ status: 'approved' }).eq('id', entryId);
+      const { error } = await supabase.from('entries').update({ status: 'approved' as const }).eq('id', entryId);
       if (error) throw error;
     },
     onSuccess: () => {

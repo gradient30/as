@@ -90,6 +90,8 @@ export type Database = {
           contributors: string[]
           created_at: string
           id: string
+          is_private: boolean
+          share_token: string | null
           status: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at: string
@@ -102,6 +104,8 @@ export type Database = {
           contributors?: string[]
           created_at?: string
           id?: string
+          is_private?: boolean
+          share_token?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at?: string
@@ -114,6 +118,8 @@ export type Database = {
           contributors?: string[]
           created_at?: string
           id?: string
+          is_private?: boolean
+          share_token?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
           title?: string
           updated_at?: string

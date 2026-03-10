@@ -8,10 +8,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useUpdateEntry } from '@/hooks/useEntries';
 import { Loader2 } from 'lucide-react';
+import { MarkdownEditor } from '@/components/MarkdownEditor';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
 interface EditDialogProps {
@@ -42,10 +42,10 @@ export function EditDialog({ entry, open, onOpenChange }: EditDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>编辑知识</DialogTitle>
-          <DialogDescription>修改标题或内容后保存。</DialogDescription>
+          <DialogDescription>修改标题或内容后保存。支持 Markdown 语法。</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -58,13 +58,12 @@ export function EditDialog({ entry, open, onOpenChange }: EditDialogProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="edit-content">内容</Label>
-            <Textarea
-              id="edit-content"
+            <Label>内容</Label>
+            <MarkdownEditor
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={8}
-              required
+              onChange={setContent}
+              placeholder="支持 Markdown 语法..."
+              rows={10}
             />
           </div>
           <div className="flex justify-end gap-2">

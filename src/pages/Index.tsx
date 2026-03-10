@@ -318,7 +318,7 @@ const Index = () => {
         )}
 
         {/* Entry grid */}
-        {entriesLoading ? (
+        {activeLoading ? (
           <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={

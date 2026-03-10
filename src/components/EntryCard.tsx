@@ -71,8 +71,8 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
   return (
     <div
       className={`group relative cursor-pointer rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02]
-        backdrop-blur-xl bg-gradient-to-br from-white/20 to-white/5 dark:from-white/10 dark:to-white/[0.02]
-        border border-white/20 dark:border-white/10 shadow-lg hover:shadow-xl
+        backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/10 dark:to-blue-900/5
+        border border-cyan-300/20 dark:border-cyan-500/15 shadow-lg shadow-cyan-500/5 hover:shadow-xl hover:shadow-cyan-500/10 hover:border-cyan-300/40
         ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}`}
       onClick={onClick}
     >

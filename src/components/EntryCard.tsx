@@ -133,7 +133,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
           </span>
         )}
         <div className="ml-auto">
-          <Activity className="h-4 w-4 text-[hsl(180,100%,50%/0.5)]" />
+          <Activity className="h-4 w-4 text-[hsl(180,100%,50%/0.7)]" />
         </div>
       </div>
 

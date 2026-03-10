@@ -266,7 +266,7 @@ const Index = () => {
         </header>
       )}
 
-      <main className="container mx-auto px-4 py-4 space-y-5">
+      <main className={`container mx-auto px-4 py-4 space-y-5 ${style === 'bento-glass' ? 'pb-16' : ''}`}>
         {/* Manage mode banner */}
         {manageMode && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary flex items-center gap-2">

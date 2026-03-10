@@ -186,11 +186,9 @@ function NeubrutalismCard({ entry, onClick, isManageMode, canManage, isOwn, onEd
         {isOwn && <OwnBadge variant="inline" />}
       </div>
 
-      {entry.categories && (
-        <Badge className="mb-2 bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
-          {entry.categories.name}
-        </Badge>
-      )}
+      <Badge className="mb-2 bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
+        {entry.categories?.name || '未知分类'}
+      </Badge>
 
       <h3 className="font-black text-xl text-foreground/90 mb-2 leading-tight line-clamp-2">
         {entry.title}

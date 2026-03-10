@@ -178,6 +178,7 @@ const Index = () => {
           canManageEntry={canManageEntry}
           isOwnEntry={isOwnEntry}
           onEdit={handleEdit}
+          onDelete={handleDelete}
           onSubmit={() => setSubmitOpen(true)}
           totalCount={totalCount}
           currentTime={currentTime}

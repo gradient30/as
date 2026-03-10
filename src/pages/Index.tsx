@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {
@@ -22,6 +22,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+
+const useDarkMode = () => {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const toggle = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('theme', next ? 'dark' : 'light');
+  };
+  return { dark, toggle };
+};
 
 const Index = () => {
   const [submitOpen, setSubmitOpen] = useState(false);
@@ -39,6 +50,7 @@ const Index = () => {
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
   const authorToken = getAuthorToken();
+  const { dark, toggle: toggleDark } = useDarkMode();
 
   const hasAdminRights = adminCategoryIds && adminCategoryIds.size > 0;
 
@@ -88,6 +100,9 @@ const Index = () => {
             <h1 className="text-lg font-bold tracking-tight">知识库</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="icon" variant="ghost" onClick={toggleDark} className="h-9 w-9">
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             {/* Manage mode toggle — visible to anyone who has admin rights or authored entries */}
             {hasAdminRights && (
               <Button

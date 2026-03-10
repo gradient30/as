@@ -173,7 +173,7 @@ const Index = () => {
 
         <CyberLayout
           entries={filteredEntries}
-          entriesLoading={entriesLoading}
+          entriesLoading={activeLoading}
           categories={categories}
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}

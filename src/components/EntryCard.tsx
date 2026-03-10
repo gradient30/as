@@ -85,7 +85,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
         {getCategoryEmoji(entry.categories?.name)}
       </div>
 
-      <Badge className="mb-2 bg-black/20 dark:bg-white/10 text-foreground border-0 text-[11px]">
+      <Badge className="mb-2 bg-cyan-500/15 dark:bg-cyan-400/10 text-foreground border border-cyan-400/20 text-[11px]">
         {entry.categories?.name || '未知分类'}
       </Badge>
 

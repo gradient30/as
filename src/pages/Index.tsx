@@ -525,12 +525,12 @@ function SkeletonLoader({ style }: { style: string }) {
           className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/8 dark:to-blue-900/5 border border-cyan-300/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
           style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
         >
-          <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
-          <Skeleton className={`h-5 w-24 rounded bg-white/10`} />
-          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-white/10`} />
-          <Skeleton className="h-4 w-full bg-white/10" />
-          {i === 0 && <Skeleton className="h-4 w-2/3 bg-white/10" />}
-          <Skeleton className="h-3 w-32 bg-white/10 mt-auto" />
+          <Skeleton className="h-10 w-10 rounded-full bg-cyan-400/10" />
+          <Skeleton className={`h-5 w-24 rounded bg-cyan-400/10`} />
+          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-cyan-400/10`} />
+          <Skeleton className="h-4 w-full bg-cyan-400/10" />
+          {i === 0 && <Skeleton className="h-4 w-2/3 bg-cyan-400/10" />}
+          <Skeleton className="h-3 w-32 bg-cyan-400/10 mt-auto" />
         </div>
       ))}
     </div>

@@ -24,6 +24,12 @@ export type CategoryRow = {
   created_at: string;
 };
 
+// Smart category IDs (hardcoded for performance)
+export const SMART_CATEGORY_IDS = {
+  FREQUENTLY_VIEWED: '1c701e75-4f1e-4d7b-9865-bb4d62684eef', // 经常看
+  IGNORED: '526caa35-fd37-47a3-8c58-295184aa7433', // 没人理
+};
+
 export type EntryWithCategory = {
   id: string;
   title: string;
@@ -37,6 +43,8 @@ export type EntryWithCategory = {
   updated_at: string;
   is_private: boolean;
   share_token: string | null;
+  view_count: number;
+  last_viewed_at: string | null;
   categories: { id: string; name: string; slug: string } | null;
 };
 

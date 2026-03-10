@@ -282,7 +282,7 @@ const Index = () => {
             placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,80%)] placeholder:text-[hsl(210,20%,35%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
+            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,90%)] placeholder:text-[hsl(210,20%,50%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
           {style === 'bento-glass' && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,35%)]">

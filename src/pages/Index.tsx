@@ -11,6 +11,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { AuthDialog } from '@/components/AuthDialog';
 import { CategoryManager } from '@/components/CategoryManager';
 import { StyleSwitcher } from '@/components/StyleSwitcher';
+import { CyberLayout } from '@/components/CyberLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -140,10 +141,76 @@ const Index = () => {
     ? 'min-h-screen bg-background'
     : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';
 
+  // For bento-glass, use the dedicated CyberLayout
+  if (style === 'bento-glass') {
+    const cyberHeaderActions = (
+      <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
+        setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
+        setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
+    );
+
+    return (
+      <div className={bgClass}>
+        {/* Style Switcher Bar */}
+        <div className="border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.9] backdrop-blur-sm border-b">
+          <div className="container mx-auto flex items-center justify-between px-4 py-2">
+            <StyleSwitcher current={style} onChange={setStyle} />
+            <div className="flex items-center gap-2">
+              <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
+                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <CyberLayout
+          entries={filteredEntries}
+          entriesLoading={entriesLoading}
+          categories={categories}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          selectedEntry={selectedEntry}
+          setSelectedEntry={setSelectedEntry}
+          canManageEntry={canManageEntry}
+          isOwnEntry={isOwnEntry}
+          onEdit={handleEdit}
+          onSubmit={() => setSubmitOpen(true)}
+          totalCount={totalCount}
+          currentTime={currentTime}
+          user={user}
+          headerActions={cyberHeaderActions}
+        />
+
+        {/* Dialogs */}
+        <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />
+        <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
+        <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+        <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />
+
+        <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>确认删除</AlertDialogTitle>
+              <AlertDialogDescription>此操作不可撤销，确定要删除这条知识吗？</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>取消</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>确认删除</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
   return (
     <div className={bgClass}>
       {/* Style Switcher Bar */}
-      <div className={`border-b ${style === 'bento-glass' ? 'border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.9]' : 'border-border/50 bg-background/80'} backdrop-blur-sm`}>
+      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
           <StyleSwitcher current={style} onChange={setStyle} />
           <div className="flex items-center gap-2">
@@ -153,68 +220,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-
-      {/* ===== BENTO GLASS: Cyberpunk Header ===== */}
-      {style === 'bento-glass' && (
-        <>
-          {/* Top nav bar */}
-          <nav className="container mx-auto px-4 py-3 flex items-center justify-between border-b border-[hsl(180,100%,50%/0.1)]">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full border border-[hsl(180,100%,50%/0.4)] flex items-center justify-center">
-                <Command className="h-4 w-4 text-[hsl(180,100%,60%)]" />
-              </div>
-              <div>
-                <h2 className="text-xs font-black tracking-[0.2em] text-[hsl(0,0%,85%)] uppercase font-mono">KNOWLEDGE</h2>
-                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.7)] font-mono">NEURAL ARCHIVE v2.0</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-6 text-[11px] font-mono tracking-wider">
-              <span className="hidden sm:flex items-center gap-1.5 text-[hsl(180,100%,60%)]">
-                <Wifi className="h-3 w-3" /> ONLINE
-              </span>
-              <span className="hidden md:inline text-[hsl(0,0%,75%)]">{String(totalCount).padStart(2, '0')}</span>
-              <span className="hidden md:inline text-[hsl(0,0%,75%)]">100%</span>
-              <span className="text-[hsl(180,100%,60%)] text-base font-black tracking-widest cyber-glow">{currentTime}</span>
-              <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
-                setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
-                setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
-            </div>
-          </nav>
-
-          {/* Hero section */}
-          <header className="container mx-auto px-4 pt-8 pb-4">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.8)] font-mono mb-2 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(180,100%,50%)] animate-pulse-cyber" />
-                  PERSONAL KNOWLEDGE SYSTEM
-                </p>
-                <h1 className="text-5xl md:text-6xl font-black tracking-tight text-[hsl(180,100%,60%)] cyber-glow uppercase">
-                  MY BRAIN
-                </h1>
-              </div>
-              {/* Stat boxes */}
-              <div className="flex gap-3">
-                {[
-                  { n: totalCount, label: 'TOTAL', highlight: false },
-                  { n: todayCount, label: 'TODAY', highlight: false },
-                  { n: myCount, label: 'MINE', highlight: true },
-                ].map(s => (
-                  <div key={s.label}
-                    className={`text-center px-4 py-2 border ${s.highlight ? 'border-[hsl(180,100%,50%/0.5)] bg-[hsl(180,100%,50%/0.05)]' : 'border-[hsl(220,30%,25%)]'}`}
-                  >
-                    <p className={`text-2xl font-black font-mono ${s.highlight ? 'text-[hsl(180,100%,60%)]' : 'text-[hsl(0,0%,85%)]'}`}>
-                      {String(s.n).padStart(2, '0')}
-                    </p>
-                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,60%)] font-mono">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
-          </header>
-        </>
-      )}
 
       {style === 'dark-editorial' && (
         <header className="container mx-auto px-4 pt-6 pb-4">
@@ -266,7 +271,7 @@ const Index = () => {
         </header>
       )}
 
-      <main className={`container mx-auto px-4 py-4 space-y-5 ${style === 'bento-glass' ? 'pb-16' : ''}`}>
+      <main className="container mx-auto px-4 py-4 space-y-5">
         {/* Manage mode banner */}
         {manageMode && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary flex items-center gap-2">
@@ -276,36 +281,23 @@ const Index = () => {
         )}
 
         {/* Search */}
-        <div className={`relative ${style === 'bento-glass' ? 'border border-[hsl(180,100%,50%/0.2)] bg-[hsl(220,40%,8%)] backdrop-blur' : style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.7)]' : 'text-muted-foreground'}`} />
+        <div className={`relative ${style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
+            placeholder="搜索知识..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,90%)] placeholder:text-[hsl(210,20%,50%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
+            className={`pl-9 ${style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
-          {style === 'bento-glass' && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,50%)]">
-              <kbd className="text-[10px] font-mono border border-[hsl(220,30%,30%)] px-1.5 py-0.5">⌘K</kbd>
-            </div>
-          )}
         </div>
 
         {/* Category filters */}
-        <div className={style === 'bento-glass' ? 'flex items-center justify-between' : ''}>
-          <CategoryFilters
-            categories={categories}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            style={style}
-          />
-          {style === 'bento-glass' && (
-            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(120,100%,50%)] animate-pulse-cyber" />
-              <span className="text-[hsl(120,80%,50%)]">LIVE SYNC</span>
-            </div>
-          )}
-        </div>
+        <CategoryFilters
+          categories={categories}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          style={style}
+        />
 
         {/* Admin panels */}
         {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
@@ -315,15 +307,13 @@ const Index = () => {
           />
         )}
 
-        {/* Entry grid/list */}
+        {/* Entry grid */}
         {entriesLoading ? (
           <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={
             style === 'dark-editorial'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
-              : style === 'bento-glass'
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto'
               : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'
           }>
             {filteredEntries.map((entry, i) => (
@@ -343,30 +333,16 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <div className={`flex flex-col items-center justify-center py-20 text-center ${style === 'bento-glass' ? 'text-[hsl(210,20%,45%)]' : ''}`}>
-            <BookOpen className={`h-12 w-12 mb-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.3)]' : 'text-muted-foreground/40'}`} />
-            <h2 className={`text-lg font-medium mb-1 ${style === 'bento-glass' ? 'text-[hsl(0,0%,70%)] font-mono' : 'text-muted-foreground'}`}>暂无知识条目</h2>
-            <p className={`text-sm mb-4 ${style === 'bento-glass' ? 'text-[hsl(210,20%,35%)]' : 'text-muted-foreground/70'}`}>成为第一个录入知识的人吧！</p>
-            <Button onClick={() => setSubmitOpen(true)} className={style === 'bento-glass' ? 'bg-[hsl(180,100%,50%)] text-[hsl(220,50%,5%)] hover:bg-[hsl(180,100%,60%)] font-mono font-bold' : ''}>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <h2 className="text-lg font-medium text-muted-foreground mb-1">暂无知识条目</h2>
+            <p className="text-sm text-muted-foreground/70 mb-4">成为第一个录入知识的人吧！</p>
+            <Button onClick={() => setSubmitOpen(true)}>
               <Plus className="h-4 w-4" />录入知识
             </Button>
           </div>
         )}
       </main>
-
-      {/* Cyberpunk Status Bar */}
-      {style === 'bento-glass' && (
-        <footer className="fixed bottom-0 left-0 right-0 border-t border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.95] backdrop-blur-sm z-40">
-          <div className="container mx-auto px-4 py-2 flex items-center justify-between text-[10px] font-mono tracking-[0.15em]">
-            <div className="flex items-center gap-6">
-              <span className="text-[hsl(210,20%,60%)]">STATUS: <span className="text-[hsl(120,80%,55%)] italic">OPERATIONAL</span></span>
-              <span className="text-[hsl(210,20%,60%)]">NOTES: <span className="text-[hsl(0,0%,85%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
-              <span className="hidden sm:inline text-[hsl(210,20%,60%)]">LAST SYNC: <span className="text-[hsl(180,80%,55%)]">{currentTime}</span></span>
-            </div>
-            <span className="text-[hsl(210,20%,60%)]">STORAGE: <span className="text-[hsl(180,100%,55%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
-          </div>
-        </footer>
-      )}
 
       {/* Dialogs */}
       <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />
@@ -440,18 +416,14 @@ function ViewTabs({ viewMode, setViewMode, variant }: {
     );
   }
 
-  // glass (cyberpunk)
+  // default (editorial)
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-4">
       {tabs.map(t => (
         <button
           key={t.key}
           onClick={() => setViewMode(t.key)}
-          className={`px-4 py-1.5 text-xs font-mono tracking-wider transition-all border ${
-            viewMode === t.key
-              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)]'
-          }`}
+          className={`text-sm transition-colors ${viewMode === t.key ? 'text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {t.label}
         </button>
@@ -565,34 +537,8 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
     );
   }
 
-  // Bento Glass (cyberpunk)
-  return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
-          !categoryFilter
-            ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-             : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
-        }`}
-        onClick={() => setCategoryFilter(undefined)}
-      >
-        全部
-      </button>
-      {l1Cats.map((cat: CategoryRow) => (
-        <button
-          key={cat.id}
-          className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
-            categoryFilter === cat.id
-              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
-          }`}
-          onClick={() => setCategoryFilter(cat.id)}
-        >
-          {cat.name}
-        </button>
-      ))}
-    </div>
-  );
+  // default fallback
+  return null;
 }
 
 function SkeletonLoader({ style }: { style: string }) {
@@ -643,35 +589,8 @@ function SkeletonLoader({ style }: { style: string }) {
     );
   }
 
-  // Bento Glass (cyberpunk)
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className={`p-5 space-y-3 cyber-border cyber-border-bottom bg-[hsl(220,40%,8%)/0.6] animate-pulse ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
-        >
-          <div className="flex gap-2">
-            <Skeleton className="h-5 w-14 bg-[hsl(180,100%,50%/0.1)]" />
-            <Skeleton className="h-5 w-20 bg-[hsl(220,30%,15%)]" />
-          </div>
-          <Skeleton className="h-3 w-32 bg-[hsl(220,30%,15%)]" />
-          <Skeleton className={`${i === 0 ? 'h-9' : 'h-6'} w-3/4 bg-[hsl(180,100%,50%/0.08)]`} />
-          <Skeleton className="h-4 w-full bg-[hsl(220,30%,12%)]" />
-          {i === 0 && (
-            <div className="flex items-center gap-4 mt-2">
-              <Skeleton className="h-16 w-16 rounded-full bg-[hsl(180,100%,50%/0.08)]" />
-              <Skeleton className="h-8 w-20 bg-[hsl(220,30%,12%)]" />
-            </div>
-          )}
-          <div className="flex justify-between border-t border-[hsl(180,100%,50%/0.05)] pt-3">
-            <Skeleton className="h-3 w-32 bg-[hsl(220,30%,12%)]" />
-            <Skeleton className="h-3 w-12 bg-[hsl(220,30%,12%)]" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  // default
+  return null;
 }
 
 export default Index;

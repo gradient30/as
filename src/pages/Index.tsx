@@ -108,15 +108,29 @@ const Index = () => {
             <Button size="icon" variant="ghost" onClick={toggleDark} className="h-9 w-9">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            {/* Manage mode toggle — visible to anyone who has admin rights or authored entries */}
-            {hasAdminRights && (
-              <Button
-                size="sm"
-                variant={manageMode ? 'default' : 'outline'}
-                onClick={() => setManageMode(!manageMode)}
-              >
-                {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                {manageMode ? '浏览模式' : '管理模式'}
+            {user ? (
+              <>
+                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">
+                  {user.email}
+                </span>
+                {hasAdminRights && (
+                  <Button
+                    size="sm"
+                    variant={manageMode ? 'default' : 'outline'}
+                    onClick={() => setManageMode(!manageMode)}
+                  >
+                    {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                    {manageMode ? '浏览模式' : '管理模式'}
+                  </Button>
+                )}
+                <Button size="icon" variant="ghost" onClick={signOut} className="h-9 w-9" title="退出登录">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setAuthOpen(true)}>
+                <LogIn className="h-4 w-4" />
+                登录
               </Button>
             )}
             <Button size="sm" onClick={() => setSubmitOpen(true)}>

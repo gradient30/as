@@ -215,7 +215,7 @@ const Index = () => {
       {/* Style Switcher Bar */}
       <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
-          <StyleSwitcher current={style} onChange={setStyle} />
+          <StyleSwitcher current={style} onChange={setStyle} drawerSide={drawerSide} onDrawerSideChange={setDrawerSide} />
           <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={toggleDark} className="h-8 w-8">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

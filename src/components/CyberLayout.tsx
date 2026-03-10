@@ -386,12 +386,12 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
 
       {headings.length > 0 && (
         <div>
-          <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">目 录</h3>
-          <div className="space-y-1.5">
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">目 录</h3>
+          <div className="space-y-2">
             {headings.map((h, i) => (
               <div key={i} className="flex items-start gap-1.5" style={{ paddingLeft: `${(h.level - 1) * 12}px` }}>
                 <span className="text-[hsl(var(--cyber-accent)/0.4)] mt-1">○</span>
-                <span className="text-[hsl(var(--cyber-text-muted))] hover:text-[hsl(var(--cyber-text))] cursor-pointer transition-colors">{h.text}</span>
+                <span className="text-[hsl(var(--cyber-text))] hover:text-[hsl(var(--cyber-accent-text))] cursor-pointer transition-colors">{h.text}</span>
               </div>
             ))}
           </div>

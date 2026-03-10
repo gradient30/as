@@ -319,6 +319,72 @@ const Index = () => {
   );
 };
 
+function ViewTabs({ viewMode, setViewMode, variant }: {
+  viewMode: 'discover' | 'mine';
+  setViewMode: (v: 'discover' | 'mine') => void;
+  variant: 'glass' | 'editorial' | 'neu';
+}) {
+  const tabs = [
+    { key: 'discover' as const, label: '发现' },
+    { key: 'mine' as const, label: '我的' },
+  ];
+
+  if (variant === 'editorial') {
+    return (
+      <div className="flex items-center gap-4">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setViewMode(t.key)}
+            className={`text-sm transition-colors ${viewMode === t.key ? 'text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  if (variant === 'neu') {
+    return (
+      <div className="flex gap-2">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setViewMode(t.key)}
+            className={`px-4 py-1.5 text-sm rounded-lg border-2 transition-all font-bold ${
+              viewMode === t.key
+                ? 'border-foreground/80 bg-foreground text-background'
+                : 'border-foreground/20 bg-background text-foreground hover:border-foreground/50'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // glass
+  return (
+    <div className="flex gap-2">
+      {tabs.map(t => (
+        <button
+          key={t.key}
+          onClick={() => setViewMode(t.key)}
+          className={`px-3 py-1 text-sm rounded-full backdrop-blur transition-all ${
+            viewMode === t.key
+              ? 'bg-primary text-primary-foreground font-bold'
+              : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ===== Sub-components =====
 
 function HeaderActions({ user, hasAdminRights, manageMode, setManageMode, signOut, setAuthOpen, setSubmitOpen, setCategoryManagerOpen, neuStyle }: any) {

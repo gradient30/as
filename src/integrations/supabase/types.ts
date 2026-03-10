@@ -194,6 +194,7 @@ export type Database = {
           display_name: string | null
           id: string
           old_author_token: string | null
+          preferred_style: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -201,6 +202,7 @@ export type Database = {
           display_name?: string | null
           id: string
           old_author_token?: string | null
+          preferred_style?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -208,6 +210,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           old_author_token?: string | null
+          preferred_style?: string | null
         }
         Relationships: []
       }

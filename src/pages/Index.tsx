@@ -127,13 +127,13 @@ const Index = () => {
   };
 
   const entryCount = filteredEntries?.length || 0;
-  const totalCount = entries?.length || 0;
-  const todayCount = entries?.filter(e => {
+  const totalCount = activeEntries?.length || 0;
+  const todayCount = activeEntries?.filter(e => {
     const d = new Date(e.created_at);
     const now = new Date();
     return d.toDateString() === now.toDateString();
   }).length || 0;
-  const myCount = entries?.filter(e => isOwnEntry(e)).length || 0;
+  const myCount = activeEntries?.filter(e => isOwnEntry(e)).length || 0;
 
   // Current time for cyberpunk display
   const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false }));

@@ -536,3 +536,116 @@ export function useMyAdminCategoryIds() {
     },
   });
 }
+
+/** Check if a category ID is a smart/virtual category */
+export function isSmartCategory(categoryId: string | undefined): boolean {
+  if (!categoryId) return false;
+  return categoryId === SMART_CATEGORY_IDS.FREQUENTLY_VIEWED || categoryId === SMART_CATEGORY_IDS.IGNORED;
+}
+
+/** Record a view for an entry */
+export function useRecordView() {
+  const queryClient = useQueryClient();
+  const authorToken = getAuthorToken();
+
+  return useMutation({
+    mutationFn: async (entryId: string) => {
+      const userId = await getCurrentUserId();
+
+      // Insert view record
+      await supabase.from('entry_views').insert({
+        entry_id: entryId,
+        viewer_token: authorToken,
+        viewer_user_id: userId,
+      });
+
+      // Update entries counters
+      // First get current count
+      const { data: entry } = await supabase
+        .from('entries')
+        .select('view_count')
+        .eq('id', entryId)
+        .single();
+
+      await supabase
+        .from('entries')
+        .update({
+          view_count: (entry?.view_count || 0) + 1,
+          last_viewed_at: new Date().toISOString(),
+        })
+        .eq('id', entryId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
+}
+
+/** Fetch entries for smart categories (经常看 / 没人理) */
+export function useSmartCategoryEntries(smartCategoryId: string | undefined) {
+  const authorToken = getAuthorToken();
+
+  return useQuery({
+    queryKey: ['smart-entries', smartCategoryId],
+    enabled: !!smartCategoryId && isSmartCategory(smartCategoryId),
+    queryFn: async () => {
+      if (smartCategoryId === SMART_CATEGORY_IDS.FREQUENTLY_VIEWED) {
+        // 经常看: entries viewed >= 5 times in the last 7 days
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const { data: viewCounts } = await supabase
+          .from('entry_views')
+          .select('entry_id')
+          .gte('viewed_at', oneWeekAgo.toISOString());
+
+        if (!viewCounts || viewCounts.length === 0) return [];
+
+        // Count views per entry
+        const counts = new Map<string, number>();
+        for (const v of viewCounts) {
+          counts.set(v.entry_id, (counts.get(v.entry_id) || 0) + 1);
+        }
+
+        // Filter entries with >= 5 views
+        const hotIds = [...counts.entries()].filter(([, c]) => c >= 5).map(([id]) => id);
+        if (hotIds.length === 0) return [];
+
+        const { data, error } = await supabase
+          .from('entries')
+          .select('*, categories(id, name, slug)')
+          .in('id', hotIds)
+          .eq('status', 'approved')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        const entries = data as unknown as EntryWithCategory[];
+        const userId = await getCurrentUserId();
+        return entries.filter(
+          (e) => !e.is_private || e.author_token === authorToken || (userId && e.user_id === userId)
+        );
+
+      } else if (smartCategoryId === SMART_CATEGORY_IDS.IGNORED) {
+        // 没人理: entries with last_viewed_at > 30 days ago or never viewed
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data, error } = await supabase
+          .from('entries')
+          .select('*, categories(id, name, slug)')
+          .eq('status', 'approved')
+          .or(`last_viewed_at.is.null,last_viewed_at.lt.${thirtyDaysAgo.toISOString()}`)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        const entries = data as unknown as EntryWithCategory[];
+        const userId = await getCurrentUserId();
+        return entries.filter(
+          (e) => !e.is_private || e.author_token === authorToken || (userId && e.user_id === userId)
+        );
+      }
+
+      return [];
+    },
+  });
+}

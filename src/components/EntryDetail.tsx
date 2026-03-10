@@ -56,6 +56,14 @@ function getCategoryEmoji(name?: string): string {
   return map[name] || '📄';
 }
 
+/* ── Responsive size classes based on drawer side ── */
+function getSizeClasses(side: SheetSide): string {
+  if (side === 'top' || side === 'bottom') {
+    return 'h-[70vh] sm:h-[60vh] w-full';
+  }
+  return 'w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px]';
+}
+
 function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCategory; shareOpen: boolean; setShareOpen: (v: boolean) => void }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = getShareUrl(entry);

@@ -152,7 +152,7 @@ const Index = () => {
     return (
       <div className={bgClass}>
         {/* Style Switcher Bar */}
-        <div className="border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.9] backdrop-blur-sm border-b">
+        <div className="border-[hsl(var(--cyber-border))] bg-[hsl(var(--cyber-sidebar))] backdrop-blur-sm border-b">
           <div className="container mx-auto flex items-center justify-between px-4 py-2">
             <StyleSwitcher current={style} onChange={setStyle} />
             <div className="flex items-center gap-2">

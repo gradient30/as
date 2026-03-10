@@ -600,7 +600,7 @@ export function CyberLayout({
                   categoryName={group.name}
                   entries={group.entries}
                   selectedEntry={selectedEntry}
-                  onSelect={setSelectedEntry}
+                  onSelect={handleSelectEntry}
                   defaultOpen={filteredGroups.length <= 3 || group.entries.some(e => e.id === selectedEntry?.id)}
                 />
               ))}

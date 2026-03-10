@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react';
 import { useEntries, useCategories, useMyAdminCategoryIds, useDeleteEntry } from '@/hooks/useEntries';
+import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
 import { SubmitDialog } from '@/components/SubmitDialog';
 import { EditDialog } from '@/components/EditDialog';
 import { AdminPanel } from '@/components/AdminPanel';
+import { AuthDialog } from '@/components/AuthDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, User } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {

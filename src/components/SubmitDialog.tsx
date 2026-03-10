@@ -113,9 +113,9 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
               type="button"
               variant="secondary"
               disabled={submitEntry.isPending || !title.trim() || !content.trim()}
-              onClick={() => { setIsPrivate(true); setTimeout(() => { const form = document.querySelector<HTMLFormElement>('form'); form?.requestSubmit(); }, 0); }}
+              onClick={() => doSubmit(true)}
             >
-              {submitEntry.isPending && isPrivate && <Loader2 className="animate-spin" />}
+              {submitEntry.isPending && <Loader2 className="animate-spin" />}
               <EyeOff className="h-4 w-4" />
               私密提交
             </Button>

@@ -20,8 +20,11 @@ export type Database = {
           created_by_token: string
           created_by_user_id: string | null
           id: string
+          is_approved: boolean
+          is_system: boolean
           keywords: string[]
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
@@ -29,8 +32,11 @@ export type Database = {
           created_by_token: string
           created_by_user_id?: string | null
           id?: string
+          is_approved?: boolean
+          is_system?: boolean
           keywords?: string[]
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
@@ -38,11 +44,22 @@ export type Database = {
           created_by_token?: string
           created_by_user_id?: string | null
           id?: string
+          is_approved?: boolean
+          is_system?: boolean
           keywords?: string[]
           name?: string
+          parent_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       category_admins: {
         Row: {

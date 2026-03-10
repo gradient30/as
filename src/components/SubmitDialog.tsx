@@ -10,9 +10,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { useSubmitEntry } from '@/hooks/useEntries';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useSubmitEntry, useVisibleCategories } from '@/hooks/useEntries';
+import type { CategoryRow } from '@/hooks/useEntries';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, EyeOff, AlertTriangle } from 'lucide-react';
+import { Loader2, EyeOff, AlertTriangle, ChevronRight } from 'lucide-react';
 import { MarkdownEditor } from '@/components/MarkdownEditor';
 
 interface SubmitDialogProps {
@@ -24,8 +32,15 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const submitEntry = useSubmitEntry();
   const { user } = useAuth();
+  const { data: categories } = useVisibleCategories();
+
+  // Build hierarchical structure
+  const l1Categories = categories?.filter(c => !c.parent_id && c.is_system) || [];
+  const getChildren = (parentId: string): CategoryRow[] =>
+    categories?.filter(c => c.parent_id === parentId) || [];
 
   const doSubmit = async (privateOverride?: boolean) => {
     if (!title.trim() || !content.trim()) return;
@@ -35,10 +50,12 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
       title: title.trim(),
       content: content.trim(),
       is_private: priv,
+      category_id: selectedCategory || undefined,
     });
     setTitle('');
     setContent('');
     setIsPrivate(false);
+    setSelectedCategory('');
     onOpenChange(false);
   };
 
@@ -53,11 +70,10 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
         <DialogHeader>
           <DialogTitle>录入知识</DialogTitle>
           <DialogDescription>
-            支持 Markdown 语法，可实时预览。系统将自动分类，相似知识将被智能合并。
+            支持 Markdown 语法，可实时预览。可选择分类或由系统自动分类。
           </DialogDescription>
         </DialogHeader>
 
-        {/* Anonymous warning */}
         {!user && (
           <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
@@ -83,6 +99,37 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
               required
             />
           </div>
+
+          {/* Category selector */}
+          <div className="space-y-2">
+            <Label>分类（可选，留空则自动分类）</Label>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="选择分类或留空自动分类" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">自动分类</SelectItem>
+                {l1Categories.map(l1 => {
+                  const children = getChildren(l1.id);
+                  return [
+                    <SelectItem key={l1.id} value={l1.id}>
+                      {l1.name}
+                    </SelectItem>,
+                    ...children.map(l2 => (
+                      <SelectItem key={l2.id} value={l2.id}>
+                        <span className="flex items-center gap-1">
+                          <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                          {l2.name}
+                          {!l2.is_approved && <span className="text-[10px] text-muted-foreground">（仅自己可见）</span>}
+                        </span>
+                      </SelectItem>
+                    )),
+                  ];
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label>内容</Label>
             <MarkdownEditor
@@ -93,7 +140,6 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
             />
           </div>
 
-          {/* Visibility toggle */}
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div className="flex items-center gap-2">
               <EyeOff className="h-4 w-4 text-muted-foreground" />

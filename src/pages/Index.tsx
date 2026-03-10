@@ -50,6 +50,7 @@ const Index = () => {
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
   const authorToken = getAuthorToken();
+  const { dark, toggle: toggleDark } = useDarkMode();
 
   const hasAdminRights = adminCategoryIds && adminCategoryIds.size > 0;
 

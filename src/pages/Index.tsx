@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, Tags } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, Tags, Wifi, Command } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {
@@ -118,16 +118,24 @@ const Index = () => {
   };
 
   const entryCount = filteredEntries?.length || 0;
-  const todayCount = filteredEntries?.filter(e => {
+  const totalCount = entries?.length || 0;
+  const todayCount = entries?.filter(e => {
     const d = new Date(e.created_at);
     const now = new Date();
     return d.toDateString() === now.toDateString();
   }).length || 0;
-  const myCount = filteredEntries?.filter(e => isOwnEntry(e)).length || 0;
+  const myCount = entries?.filter(e => isOwnEntry(e)).length || 0;
+
+  // Current time for cyberpunk display
+  const [currentTime, setCurrentTime] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false }));
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date().toLocaleTimeString('en-US', { hour12: false })), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Background classes per style
   const bgClass = style === 'bento-glass'
-    ? 'min-h-screen bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-teal-400/5 dark:from-cyan-900/30 dark:via-blue-950/20 dark:to-background'
+    ? 'min-h-screen bg-[hsl(220,50%,5%)]'
     : style === 'dark-editorial'
     ? 'min-h-screen bg-background'
     : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';
@@ -135,7 +143,7 @@ const Index = () => {
   return (
     <div className={bgClass}>
       {/* Style Switcher Bar */}
-      <div className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
+      <div className={`border-b ${style === 'bento-glass' ? 'border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.9]' : 'border-border/50 bg-background/80'} backdrop-blur-sm`}>
         <div className="container mx-auto flex items-center justify-between px-4 py-2">
           <StyleSwitcher current={style} onChange={setStyle} />
           <div className="flex items-center gap-2">
@@ -146,23 +154,66 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Header — varies by style */}
+      {/* ===== BENTO GLASS: Cyberpunk Header ===== */}
       {style === 'bento-glass' && (
-        <header className="container mx-auto px-4 pt-6 pb-4">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-0.5">知 识 库</p>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight">My Brain</h1>
-            </div>
+        <>
+          {/* Top nav bar */}
+          <nav className="container mx-auto px-4 py-3 flex items-center justify-between border-b border-[hsl(180,100%,50%/0.1)]">
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">{entryCount} 条</Badge>
+              <div className="h-8 w-8 rounded-full border border-[hsl(180,100%,50%/0.4)] flex items-center justify-center">
+                <Command className="h-4 w-4 text-[hsl(180,100%,60%)]" />
+              </div>
+              <div>
+                <h2 className="text-xs font-black tracking-[0.2em] text-[hsl(0,0%,85%)] uppercase font-mono">KNOWLEDGE</h2>
+                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.5)] font-mono">NEURAL ARCHIVE v2.0</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 text-[11px] font-mono tracking-wider">
+              <span className="hidden sm:flex items-center gap-1.5 text-[hsl(180,100%,60%)]">
+                <Wifi className="h-3 w-3" /> ONLINE
+              </span>
+              <span className="hidden md:inline text-[hsl(0,0%,60%)]">{String(totalCount).padStart(2, '0')}</span>
+              <span className="hidden md:inline text-[hsl(0,0%,60%)]">100%</span>
+              <span className="text-[hsl(180,100%,60%)] text-base font-black tracking-widest cyber-glow">{currentTime}</span>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
                 setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
             </div>
-          </div>
-          <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
-        </header>
+          </nav>
+
+          {/* Hero section */}
+          <header className="container mx-auto px-4 pt-8 pb-4">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.6)] font-mono mb-2 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[hsl(180,100%,50%)] animate-pulse-cyber" />
+                  PERSONAL KNOWLEDGE SYSTEM
+                </p>
+                <h1 className="text-5xl md:text-6xl font-black tracking-tight text-[hsl(180,100%,60%)] cyber-glow uppercase">
+                  MY BRAIN
+                </h1>
+              </div>
+              {/* Stat boxes */}
+              <div className="flex gap-3">
+                {[
+                  { n: totalCount, label: 'TOTAL', highlight: false },
+                  { n: todayCount, label: 'TODAY', highlight: false },
+                  { n: myCount, label: 'MINE', highlight: true },
+                ].map(s => (
+                  <div key={s.label}
+                    className={`text-center px-4 py-2 border ${s.highlight ? 'border-[hsl(180,100%,50%/0.5)] bg-[hsl(180,100%,50%/0.05)]' : 'border-[hsl(220,30%,25%)]'}`}
+                  >
+                    <p className={`text-2xl font-black font-mono ${s.highlight ? 'text-[hsl(180,100%,60%)]' : 'text-[hsl(0,0%,85%)]'}`}>
+                      {String(s.n).padStart(2, '0')}
+                    </p>
+                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,45%)] font-mono">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
+          </header>
+        </>
       )}
 
       {style === 'dark-editorial' && (
@@ -215,7 +266,7 @@ const Index = () => {
         </header>
       )}
 
-      <main className="container mx-auto px-4 py-4 space-y-5">
+      <main className={`container mx-auto px-4 py-4 space-y-5 ${style === 'bento-glass' ? 'pb-16' : ''}`}>
         {/* Manage mode banner */}
         {manageMode && (
           <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary flex items-center gap-2">
@@ -225,23 +276,36 @@ const Index = () => {
         )}
 
         {/* Search */}
-        <div className={`relative ${style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className={`relative ${style === 'bento-glass' ? 'border border-[hsl(180,100%,50%/0.2)] bg-[hsl(220,40%,8%)] backdrop-blur' : style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.5)]' : 'text-muted-foreground'}`} />
           <Input
-            placeholder="搜索知识..."
+            placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`pl-9 ${style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
+            className={`pl-9 ${style === 'bento-glass' ? 'border-0 bg-transparent text-[hsl(0,0%,80%)] placeholder:text-[hsl(210,20%,35%)] placeholder:tracking-widest placeholder:text-xs font-mono h-12' : style === 'neubrutalism' ? 'border-0 h-12 text-base' : ''}`}
           />
+          {style === 'bento-glass' && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[hsl(210,20%,35%)]">
+              <kbd className="text-[10px] font-mono border border-[hsl(220,30%,25%)] px-1.5 py-0.5">⌘K</kbd>
+            </div>
+          )}
         </div>
 
         {/* Category filters */}
-        <CategoryFilters
-          categories={categories}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          style={style}
-        />
+        <div className={style === 'bento-glass' ? 'flex items-center justify-between' : ''}>
+          <CategoryFilters
+            categories={categories}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            style={style}
+          />
+          {style === 'bento-glass' && (
+            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-[hsl(120,100%,50%)] animate-pulse-cyber" />
+              <span className="text-[hsl(120,80%,50%)]">LIVE SYNC</span>
+            </div>
+          )}
+        </div>
 
         {/* Admin panels */}
         {manageMode && categoryFilter && adminCategories.some(c => c.id === categoryFilter) && (
@@ -250,9 +314,6 @@ const Index = () => {
             categoryName={adminCategories.find(c => c.id === categoryFilter)?.name || ''}
           />
         )}
-
-        {/* Editorial table header */}
-        {/* Editorial section removed — now uses card grid */}
 
         {/* Entry grid/list */}
         {entriesLoading ? (
@@ -282,16 +343,30 @@ const Index = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h2 className="text-lg font-medium text-muted-foreground mb-1">暂无知识条目</h2>
-            <p className="text-sm text-muted-foreground/70 mb-4">成为第一个录入知识的人吧！</p>
-            <Button onClick={() => setSubmitOpen(true)}>
+          <div className={`flex flex-col items-center justify-center py-20 text-center ${style === 'bento-glass' ? 'text-[hsl(210,20%,45%)]' : ''}`}>
+            <BookOpen className={`h-12 w-12 mb-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.3)]' : 'text-muted-foreground/40'}`} />
+            <h2 className={`text-lg font-medium mb-1 ${style === 'bento-glass' ? 'text-[hsl(0,0%,70%)] font-mono' : 'text-muted-foreground'}`}>暂无知识条目</h2>
+            <p className={`text-sm mb-4 ${style === 'bento-glass' ? 'text-[hsl(210,20%,35%)]' : 'text-muted-foreground/70'}`}>成为第一个录入知识的人吧！</p>
+            <Button onClick={() => setSubmitOpen(true)} className={style === 'bento-glass' ? 'bg-[hsl(180,100%,50%)] text-[hsl(220,50%,5%)] hover:bg-[hsl(180,100%,60%)] font-mono font-bold' : ''}>
               <Plus className="h-4 w-4" />录入知识
             </Button>
           </div>
         )}
       </main>
+
+      {/* Cyberpunk Status Bar */}
+      {style === 'bento-glass' && (
+        <footer className="fixed bottom-0 left-0 right-0 border-t border-[hsl(180,100%,50%/0.1)] bg-[hsl(220,50%,5%)/0.95] backdrop-blur-sm z-40">
+          <div className="container mx-auto px-4 py-2 flex items-center justify-between text-[10px] font-mono tracking-[0.15em]">
+            <div className="flex items-center gap-6">
+              <span className="text-[hsl(210,20%,45%)]">STATUS: <span className="text-[hsl(120,80%,50%)] italic">OPERATIONAL</span></span>
+              <span className="text-[hsl(210,20%,45%)]">NOTES: <span className="text-[hsl(0,0%,80%)] font-black">{String(totalCount).padStart(3, '0')} LOADED</span></span>
+              <span className="hidden sm:inline text-[hsl(210,20%,45%)]">LAST SYNC: <span className="text-[hsl(180,80%,50%)]">{currentTime}</span></span>
+            </div>
+            <span className="text-[hsl(210,20%,45%)]">STORAGE: <span className="text-[hsl(180,100%,50%)]">{Math.min(99, 8 + totalCount * 2)}% USED</span></span>
+          </div>
+        </footer>
+      )}
 
       {/* Dialogs */}
       <SubmitDialog open={submitOpen} onOpenChange={setSubmitOpen} />
@@ -365,17 +440,17 @@ function ViewTabs({ viewMode, setViewMode, variant }: {
     );
   }
 
-  // glass
+  // glass (cyberpunk)
   return (
     <div className="flex gap-2">
       {tabs.map(t => (
         <button
           key={t.key}
           onClick={() => setViewMode(t.key)}
-          className={`px-3 py-1 text-sm rounded-full backdrop-blur transition-all ${
+          className={`px-4 py-1.5 text-xs font-mono tracking-wider transition-all border ${
             viewMode === t.key
-              ? 'bg-primary text-primary-foreground font-bold'
-              : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)]'
           }`}
         >
           {t.label}
@@ -490,43 +565,32 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
     );
   }
 
-  // Bento Glass (default)
+  // Bento Glass (cyberpunk)
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-          <Badge
-          variant={!categoryFilter ? 'default' : 'outline'}
-          className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
-          onClick={() => setCategoryFilter(undefined)}
+    <div className="flex flex-wrap gap-2">
+      <button
+        className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
+          !categoryFilter
+            ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+            : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+        }`}
+        onClick={() => setCategoryFilter(undefined)}
+      >
+        全部
+      </button>
+      {l1Cats.map((cat: CategoryRow) => (
+        <button
+          key={cat.id}
+          className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
+            categoryFilter === cat.id
+              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
+          }`}
+          onClick={() => setCategoryFilter(cat.id)}
         >
-          全部
-        </Badge>
-        {l1Cats.map((cat: CategoryRow) => (
-          <Badge
-            key={cat.id}
-            variant={categoryFilter === cat.id ? 'default' : 'outline'}
-            className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
-            onClick={() => setCategoryFilter(cat.id)}
-          >
-            {cat.name}
-          </Badge>
-        ))}
-      </div>
-      {categoryFilter && l1Cats.some((c: CategoryRow) => c.id === categoryFilter) && (
-        <div className="flex flex-wrap gap-2 pl-4">
-          {getChildren(categoryFilter).map((sub: CategoryRow) => (
-            <Badge
-              key={sub.id}
-              variant={categoryFilter === sub.id ? 'default' : 'outline'}
-              className="cursor-pointer text-xs"
-              onClick={() => setCategoryFilter(sub.id)}
-            >
-              {sub.name}
-              {!sub.is_approved && <span className="ml-1 opacity-60">（待审核）</span>}
-            </Badge>
-          ))}
-        </div>
-      )}
+          {cat.name}
+        </button>
+      ))}
     </div>
   );
 }
@@ -534,16 +598,19 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
 function SkeletonLoader({ style }: { style: string }) {
   if (style === 'dark-editorial') {
     return (
-      <div className="space-y-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-4 py-4 px-2 border-b border-border/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
-            <Skeleton className="h-8 w-8 rounded" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
+          <div key={i} className="rounded-lg border border-border/30 p-4 space-y-3 animate-pulse">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-12" />
+              <Skeleton className="h-5 w-16" />
             </div>
-            <Skeleton className="h-5 w-16 rounded hidden md:block" />
-            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <div className="flex justify-between">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-8 w-8" />
+            </div>
           </div>
         ))}
       </div>
@@ -556,10 +623,8 @@ function SkeletonLoader({ style }: { style: string }) {
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border-2 border-foreground/20 p-5 space-y-3 animate-fade-in"
+            className="rounded-xl border-2 border-foreground/20 p-5 space-y-3 animate-pulse"
             style={{
-              animationDelay: `${i * 100}ms`,
-              animationFillMode: 'both',
               backgroundColor: `hsl(${[50, 160, 270, 350, 200, 30][i % 6]} ${i % 2 === 0 ? '60%' : '70%'} 90% / 0.4)`,
             }}
           >
@@ -578,21 +643,31 @@ function SkeletonLoader({ style }: { style: string }) {
     );
   }
 
-  // Bento Glass
+  // Bento Glass (cyberpunk)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/8 dark:to-blue-900/5 border border-cyan-300/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
-          style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
+          className={`p-5 space-y-3 cyber-border cyber-border-bottom bg-[hsl(220,40%,8%)/0.6] animate-pulse ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
         >
-          <Skeleton className="h-10 w-10 rounded-full bg-cyan-400/10" />
-          <Skeleton className={`h-5 w-24 rounded bg-cyan-400/10`} />
-          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-cyan-400/10`} />
-          <Skeleton className="h-4 w-full bg-cyan-400/10" />
-          {i === 0 && <Skeleton className="h-4 w-2/3 bg-cyan-400/10" />}
-          <Skeleton className="h-3 w-32 bg-cyan-400/10 mt-auto" />
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-14 bg-[hsl(180,100%,50%/0.1)]" />
+            <Skeleton className="h-5 w-20 bg-[hsl(220,30%,15%)]" />
+          </div>
+          <Skeleton className="h-3 w-32 bg-[hsl(220,30%,15%)]" />
+          <Skeleton className={`${i === 0 ? 'h-9' : 'h-6'} w-3/4 bg-[hsl(180,100%,50%/0.08)]`} />
+          <Skeleton className="h-4 w-full bg-[hsl(220,30%,12%)]" />
+          {i === 0 && (
+            <div className="flex items-center gap-4 mt-2">
+              <Skeleton className="h-16 w-16 rounded-full bg-[hsl(180,100%,50%/0.08)]" />
+              <Skeleton className="h-8 w-20 bg-[hsl(220,30%,12%)]" />
+            </div>
+          )}
+          <div className="flex justify-between border-t border-[hsl(180,100%,50%/0.05)] pt-3">
+            <Skeleton className="h-3 w-32 bg-[hsl(220,30%,12%)]" />
+            <Skeleton className="h-3 w-12 bg-[hsl(220,30%,12%)]" />
+          </div>
         </div>
       ))}
     </div>

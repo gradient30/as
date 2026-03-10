@@ -103,3 +103,69 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Cyberpunk bracket corners */
+.cyber-border {
+  position: relative;
+}
+.cyber-border::before,
+.cyber-border::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+.cyber-border::before {
+  top: 0; left: 0;
+  border-top: 2px solid hsl(180 100% 50% / 0.5);
+  border-left: 2px solid hsl(180 100% 50% / 0.5);
+}
+.cyber-border::after {
+  top: 0; right: 0;
+  border-top: 2px solid hsl(180 100% 50% / 0.5);
+  border-right: 2px solid hsl(180 100% 50% / 0.5);
+}
+.cyber-border-bottom::before,
+.cyber-border-bottom::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+.cyber-border-bottom::before {
+  bottom: 0; left: 0;
+  border-bottom: 2px solid hsl(180 100% 50% / 0.5);
+  border-left: 2px solid hsl(180 100% 50% / 0.5);
+}
+.cyber-border-bottom::after {
+  bottom: 0; right: 0;
+  border-bottom: 2px solid hsl(180 100% 50% / 0.5);
+  border-right: 2px solid hsl(180 100% 50% / 0.5);
+}
+
+/* Cyber glow text */
+.cyber-glow {
+  text-shadow: 0 0 10px hsl(180 100% 50% / 0.3), 0 0 40px hsl(180 100% 50% / 0.1);
+}
+
+/* Cyber progress bar */
+.cyber-progress {
+  background: linear-gradient(90deg, hsl(180 100% 50% / 0.8), hsl(200 100% 60% / 0.6));
+  box-shadow: 0 0 8px hsl(180 100% 50% / 0.4);
+}
+
+/* Scan line animation */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes pulse-cyber {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-cyber {
+  animation: pulse-cyber 2s ease-in-out infinite;
+}

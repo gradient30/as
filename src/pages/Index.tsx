@@ -228,7 +228,7 @@ const Index = () => {
         <header className="container mx-auto px-4 pt-6 pb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <img src={(await import('@/assets/logo-fish.png')).default} alt="openwz" className="h-7 w-7 object-contain" />
+              <img src={logoFish} alt="openwz" className="h-7 w-7 object-contain" />
               <h1 className="text-lg font-black uppercase tracking-widest">openwz</h1>
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="editorial" />
             </div>

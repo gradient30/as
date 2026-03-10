@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import logoFish from '@/assets/logo-fish.png';
 import { format } from 'date-fns';
 import { Search, Plus, Command, X, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Share2, EyeOff, Eye, Trash2, MessageCircle, ExternalLink, Check } from 'lucide-react';
 import { Input } from '@/components/ui/input';

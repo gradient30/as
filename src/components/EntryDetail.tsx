@@ -225,7 +225,7 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full sm:w-[60vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] max-w-[900px] p-0 border-l-[3px] border-foreground/80 shadow-[-8px_0_0_hsl(var(--foreground)/0.15)] overflow-y-auto [&>button]:hidden"
+        className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 border-l-[3px] border-foreground/80 shadow-[-8px_0_0_hsl(var(--foreground)/0.15)] overflow-y-auto [&>button]:hidden"
       >
         {/* Colored header block matching card */}
         <div className="px-6 pt-5 pb-4 sticky top-0 z-10" style={{ backgroundColor: headerColor }}>

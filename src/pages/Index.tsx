@@ -336,7 +336,7 @@ const Index = () => {
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
-                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); }}
+                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); recordView.mutate(entry.id); }}
                 layoutStyle={style}
                 index={i}
               />

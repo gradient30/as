@@ -11,6 +11,19 @@ import {
 } from '@/lib/categorization';
 import { toast } from 'sonner';
 
+export type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  keywords: string[];
+  parent_id: string | null;
+  is_system: boolean;
+  is_approved: boolean;
+  created_by_token: string;
+  created_by_user_id: string | null;
+  created_at: string;
+};
+
 export type EntryWithCategory = {
   id: string;
   title: string;
@@ -31,7 +44,6 @@ function generateShareToken(): string {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 16);
 }
 
-/** Get current user id synchronously (best-effort) */
 async function getCurrentUserId(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
   return data.session?.user?.id ?? null;
@@ -50,7 +62,15 @@ export function useEntries(categoryFilter?: string, options?: { showAll?: boolea
         .order('created_at', { ascending: false });
 
       if (categoryFilter) {
-        query = query.eq('category_id', categoryFilter);
+        // Could be L1 or L2 category. If L1, also include entries from child categories
+        const { data: childCats } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('parent_id', categoryFilter);
+        
+        const childIds = childCats?.map(c => c.id) || [];
+        const allIds = [categoryFilter, ...childIds];
+        query = query.in('category_id', allIds);
       }
 
       const { data, error } = await query;
@@ -58,10 +78,8 @@ export function useEntries(categoryFilter?: string, options?: { showAll?: boolea
 
       const entries = data as unknown as EntryWithCategory[];
 
-      // If showAll (admin mode), return everything
       if (options?.showAll) return entries;
 
-      // Otherwise filter: show public entries + own private entries
       const userId = await getCurrentUserId();
       return entries.filter(
         (e) => !e.is_private || e.author_token === authorToken || (userId && e.user_id === userId)
@@ -70,7 +88,6 @@ export function useEntries(categoryFilter?: string, options?: { showAll?: boolea
   });
 }
 
-/** Fetch a single entry by ID, optionally with share token for private entries */
 export function useEntryById(entryId?: string, shareToken?: string) {
   const authorToken = getAuthorToken();
 
@@ -87,12 +104,10 @@ export function useEntryById(entryId?: string, shareToken?: string) {
       if (error) throw error;
       const entry = data as unknown as EntryWithCategory;
 
-      // Access check: public, own, or valid share token
       if (entry.is_private) {
         const userId = await getCurrentUserId();
         const isOwner = entry.author_token === authorToken || (userId && entry.user_id === userId);
         if (!isOwner && entry.share_token !== shareToken) {
-          // Check if admin
           if (userId) {
             const { data: roleData } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' });
             if (!roleData) throw new Error('无权访问该知识');
@@ -107,6 +122,7 @@ export function useEntryById(entryId?: string, shareToken?: string) {
   });
 }
 
+/** Fetch all categories (hierarchical) */
 export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
@@ -116,7 +132,42 @@ export function useCategories() {
         .select('*')
         .order('created_at', { ascending: true });
       if (error) throw error;
-      return data;
+      return data as unknown as CategoryRow[];
+    },
+  });
+}
+
+/** Only approved + system categories visible to regular users */
+export function useVisibleCategories() {
+  const authorToken = getAuthorToken();
+  return useQuery({
+    queryKey: ['categories', 'visible', authorToken],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      const all = data as unknown as CategoryRow[];
+      // Show: system categories, approved categories, or own unapproved categories
+      return all.filter(c => c.is_system || c.is_approved || c.created_by_token === authorToken);
+    },
+  });
+}
+
+/** Pending (unapproved) L2 categories for admin review */
+export function usePendingCategories() {
+  return useQuery({
+    queryKey: ['categories', 'pending'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_approved', false)
+        .eq('is_system', false)
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      return data as unknown as CategoryRow[];
     },
   });
 }
@@ -157,68 +208,85 @@ export function useSubmitEntry() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ title, content, is_private = false }: { title: string; content: string; is_private?: boolean }) => {
+    mutationFn: async ({ title, content, is_private = false, category_id }: { 
+      title: string; content: string; is_private?: boolean; category_id?: string 
+    }) => {
       const authorToken = getAuthorToken();
       const userId = await getCurrentUserId();
       const keywords = extractKeywords(title + ' ' + content);
-
-      // Generate share token for private entries
       const shareToken = is_private ? generateShareToken() : null;
 
-      // 1. Get all categories
-      const { data: categories } = await supabase
-        .from('categories')
-        .select('id, name, keywords, slug');
+      let categoryId: string | undefined = category_id;
 
-      const existingCategories = categories || [];
-      const bestCategory = findBestCategory(keywords, existingCategories);
-
-      let categoryId: string;
-      let isNewCategory = false;
-
-      if (bestCategory) {
-        categoryId = bestCategory.categoryId;
-
-        // Update category keywords (union)
-        const existingCat = existingCategories.find(c => c.id === categoryId);
-        if (existingCat) {
-          const mergedKeywords = [...new Set([...existingCat.keywords, ...keywords])];
-          await supabase
-            .from('categories')
-            .update({ keywords: mergedKeywords })
-            .eq('id', categoryId);
-        }
-      } else {
-        // Create new category
-        isNewCategory = true;
-        const catName = generateCategoryName(keywords);
-        const slug = generateSlug(catName) + '-' + Date.now();
-
-        const { data: newCat, error: catError } = await supabase
+      // If no category selected, try auto-categorization
+      if (!categoryId) {
+        const { data: categories } = await supabase
           .from('categories')
-          .insert({ name: catName, slug, keywords, created_by_token: authorToken, created_by_user_id: userId })
-          .select()
-          .single();
+          .select('id, name, keywords, slug');
 
-        if (catError) throw catError;
-        categoryId = newCat.id;
+        const existingCategories = categories || [];
+        const bestCategory = findBestCategory(keywords, existingCategories);
 
-        // Make submitter the founder admin
-        await supabase.from('category_admins').insert({
-          category_id: categoryId,
-          admin_token: authorToken,
-          is_founder: true,
-          auto_merge_enabled: true,
-          user_id: userId,
-        });
+        if (bestCategory) {
+          categoryId = bestCategory.categoryId;
+          const existingCat = existingCategories.find(c => c.id === categoryId);
+          if (existingCat) {
+            const mergedKeywords = [...new Set([...existingCat.keywords, ...keywords])];
+            await supabase
+              .from('categories')
+              .update({ keywords: mergedKeywords })
+              .eq('id', categoryId);
+          }
+        } else {
+          // Create new L2 category under best-matching L1, pending approval
+          const { data: l1Cats } = await supabase
+            .from('categories')
+            .select('id, name, keywords')
+            .eq('is_system', true);
+          
+          let parentId: string | undefined;
+          if (l1Cats && l1Cats.length > 0) {
+            const bestL1 = findBestCategory(keywords, l1Cats);
+            if (bestL1) parentId = bestL1.categoryId;
+          }
+
+          const catName = generateCategoryName(keywords);
+          const slug = generateSlug(catName) + '-' + Date.now();
+
+          const { data: newCat, error: catError } = await supabase
+            .from('categories')
+            .insert({ 
+              name: catName, 
+              slug, 
+              keywords, 
+              created_by_token: authorToken, 
+              created_by_user_id: userId,
+              parent_id: parentId || null,
+              is_system: false,
+              is_approved: false, // Needs admin approval
+            })
+            .select()
+            .single();
+
+          if (catError) throw catError;
+          categoryId = newCat.id;
+
+          await supabase.from('category_admins').insert({
+            category_id: categoryId,
+            admin_token: authorToken,
+            is_founder: true,
+            auto_merge_enabled: true,
+            user_id: userId,
+          });
+        }
       }
 
-      // 2. Private entries skip similarity check — create directly
+      // Private entries skip similarity check
       if (is_private) {
         const { error } = await supabase.from('entries').insert({
           title,
           content,
-          category_id: categoryId,
+          category_id: categoryId || null,
           author_token: authorToken,
           user_id: userId,
           status: 'approved' as const,
@@ -231,97 +299,92 @@ export function useSubmitEntry() {
         return;
       }
 
-      // 3. Check similarity with existing entries in the same category
-      const { data: existingEntries } = await supabase
-        .from('entries')
-        .select('*')
-        .eq('category_id', categoryId)
-        .eq('status', 'approved')
-        .eq('is_private', false);
+      // Check similarity with existing entries
+      if (categoryId) {
+        const { data: existingEntries } = await supabase
+          .from('entries')
+          .select('*')
+          .eq('category_id', categoryId)
+          .eq('status', 'approved')
+          .eq('is_private', false);
 
-      let merged = false;
-      if (existingEntries && existingEntries.length > 0) {
-        for (const entry of existingEntries) {
-          const entryKeywords = extractKeywords(entry.title + ' ' + entry.content);
-          const similarity = calculateSimilarity(keywords, entryKeywords);
+        let merged = false;
+        if (existingEntries && existingEntries.length > 0) {
+          for (const entry of existingEntries) {
+            const entryKeywords = extractKeywords(entry.title + ' ' + entry.content);
+            const similarity = calculateSimilarity(keywords, entryKeywords);
 
-          if (similarity >= MERGE_THRESHOLD) {
-            const { data: admins } = await supabase
-              .from('category_admins')
-              .select('auto_merge_enabled')
-              .eq('category_id', categoryId)
-              .limit(1);
+            if (similarity >= MERGE_THRESHOLD) {
+              const { data: admins } = await supabase
+                .from('category_admins')
+                .select('auto_merge_enabled')
+                .eq('category_id', categoryId)
+                .limit(1);
 
-            const autoMerge = admins?.[0]?.auto_merge_enabled ?? true;
+              const autoMerge = admins?.[0]?.auto_merge_enabled ?? true;
 
-            if (autoMerge) {
-              const mergedContent = entry.content + '\n\n---\n\n' + content;
-              const contributors = [...new Set([...entry.contributors, authorToken])];
+              if (autoMerge) {
+                const mergedContent = entry.content + '\n\n---\n\n' + content;
+                const contributors = [...new Set([...entry.contributors, authorToken])];
 
-              await supabase
-                .from('entries')
-                .update({ content: mergedContent, contributors })
-                .eq('id', entry.id);
+                await supabase
+                  .from('entries')
+                  .update({ content: mergedContent, contributors })
+                  .eq('id', entry.id);
 
-              await supabase.from('entry_merges').insert({
-                target_entry_id: entry.id,
-                source_title: title,
-                source_content: content,
-                merged_by_token: authorToken,
-              });
+                await supabase.from('entry_merges').insert({
+                  target_entry_id: entry.id,
+                  source_title: title,
+                  source_content: content,
+                  merged_by_token: authorToken,
+                });
 
-              merged = true;
-              toast.success('知识已合并到已有条目中');
-              break;
-            } else {
-              const { error } = await supabase.from('entries').insert({
-                title,
-                content,
-                category_id: categoryId,
-                author_token: authorToken,
-                user_id: userId,
-                status: 'pending' as const,
-                contributors: [authorToken],
-              });
-              if (error) throw error;
-              merged = true;
-              toast.info('知识已提交，等待管理员审核');
-              break;
+                merged = true;
+                toast.success('知识已合并到已有条目中');
+                break;
+              } else {
+                const { error } = await supabase.from('entries').insert({
+                  title,
+                  content,
+                  category_id: categoryId,
+                  author_token: authorToken,
+                  user_id: userId,
+                  status: 'pending' as const,
+                  contributors: [authorToken],
+                });
+                if (error) throw error;
+                merged = true;
+                toast.info('知识已提交，等待管理员审核');
+                break;
+              }
             }
           }
         }
-      }
 
-      // 4. If not merged, create new entry
-      if (!merged) {
+        if (!merged) {
+          const { error } = await supabase.from('entries').insert({
+            title,
+            content,
+            category_id: categoryId,
+            author_token: authorToken,
+            user_id: userId,
+            status: 'approved' as const,
+            contributors: [authorToken],
+          });
+          if (error) throw error;
+          toast.success('知识已成功录入！');
+        }
+      } else {
         const { error } = await supabase.from('entries').insert({
           title,
           content,
-          category_id: categoryId,
+          category_id: null,
           author_token: authorToken,
           user_id: userId,
           status: 'approved' as const,
           contributors: [authorToken],
         });
         if (error) throw error;
-
-        if (!isNewCategory) {
-          const { data: admins } = await supabase
-            .from('category_admins')
-            .select('admin_token')
-            .eq('category_id', categoryId);
-          
-          const isAdmin = admins?.some(a => a.admin_token === authorToken);
-          if (!isAdmin && (!admins || admins.length === 0)) {
-            await supabase.from('category_admins').insert({
-              category_id: categoryId,
-              admin_token: authorToken,
-              is_founder: true,
-              user_id: userId,
-            });
-          }
-        }
-
         toast.success('知识已成功录入！');
       }
     },
@@ -399,6 +462,41 @@ export function useApproveEntry() {
   });
 }
 
+export function useApproveCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name, parentId }: { id: string; name?: string; parentId?: string }) => {
+      const updates: Record<string, unknown> = { is_approved: true };
+      if (name) updates.name = name;
+      if (parentId) updates.parent_id = parentId;
+      const { error } = await supabase.from('categories').update(updates).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success('分类已审核通过');
+    },
+  });
+}
+
+export function useRejectCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // Move entries to uncategorized, then delete
+      await supabase.from('entries').update({ category_id: null }).eq('category_id', id);
+      await supabase.from('category_admins').delete().eq('category_id', id);
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['entries'] });
+      toast.success('分类已拒绝并删除');
+    },
+  });
+}
+
 export function useUpdateAutoMerge() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -416,7 +514,6 @@ export function useUpdateAutoMerge() {
   });
 }
 
-/** Get all category IDs where the current user is admin */
 export function useMyAdminCategoryIds() {
   const authorToken = getAuthorToken();
   return useQuery({

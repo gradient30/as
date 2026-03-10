@@ -117,7 +117,7 @@ const Index = () => {
 
   // Background classes per style
   const bgClass = style === 'bento-glass'
-    ? 'min-h-screen bg-gradient-to-br from-purple-500/20 via-pink-400/10 to-orange-300/10 dark:from-purple-900/30 dark:via-pink-900/10 dark:to-background'
+    ? 'min-h-screen bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-teal-400/5 dark:from-cyan-900/30 dark:via-blue-950/20 dark:to-background'
     : style === 'dark-editorial'
     ? 'min-h-screen bg-background'
     : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';
@@ -432,9 +432,9 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        <Badge
+          <Badge
           variant={!categoryFilter ? 'default' : 'outline'}
-          className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+          className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
           onClick={() => setCategoryFilter(undefined)}
         >
           全部
@@ -443,7 +443,7 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
           <Badge
             key={cat.id}
             variant={categoryFilter === cat.id ? 'default' : 'outline'}
-            className="cursor-pointer backdrop-blur bg-white/20 dark:bg-white/10 border-white/30"
+            className="cursor-pointer backdrop-blur bg-cyan-500/10 dark:bg-cyan-400/10 border-cyan-400/20 hover:bg-cyan-500/20"
             onClick={() => setCategoryFilter(cat.id)}
           >
             {cat.name}
@@ -522,15 +522,15 @@ function SkeletonLoader({ style }: { style: string }) {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 dark:from-white/8 dark:to-white/[0.02] border border-white/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
+          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/8 dark:to-blue-900/5 border border-cyan-300/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
           style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
         >
-          <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
-          <Skeleton className={`h-5 w-24 rounded bg-white/10`} />
-          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-white/10`} />
-          <Skeleton className="h-4 w-full bg-white/10" />
-          {i === 0 && <Skeleton className="h-4 w-2/3 bg-white/10" />}
-          <Skeleton className="h-3 w-32 bg-white/10 mt-auto" />
+          <Skeleton className="h-10 w-10 rounded-full bg-cyan-400/10" />
+          <Skeleton className={`h-5 w-24 rounded bg-cyan-400/10`} />
+          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-cyan-400/10`} />
+          <Skeleton className="h-4 w-full bg-cyan-400/10" />
+          {i === 0 && <Skeleton className="h-4 w-2/3 bg-cyan-400/10" />}
+          <Skeleton className="h-3 w-32 bg-cyan-400/10 mt-auto" />
         </div>
       ))}
     </div>

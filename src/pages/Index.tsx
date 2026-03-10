@@ -206,7 +206,7 @@ const Index = () => {
                     <p className={`text-2xl font-black font-mono ${s.highlight ? 'text-[hsl(180,100%,60%)]' : 'text-[hsl(0,0%,85%)]'}`}>
                       {String(s.n).padStart(2, '0')}
                     </p>
-                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,45%)] font-mono">{s.label}</p>
+                    <p className="text-[9px] tracking-[0.2em] text-[hsl(210,20%,60%)] font-mono">{s.label}</p>
                   </div>
                 ))}
               </div>

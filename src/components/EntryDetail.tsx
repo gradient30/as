@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import { useToggleEntryVisibility } from '@/hooks/useEntries';
+import type { LayoutStyle } from '@/hooks/useLayoutStyle';
+import { getCardColor } from '@/hooks/useLayoutStyle';
 
 interface EntryDetailProps {
   entry: EntryWithCategory | null;
@@ -28,6 +30,8 @@ interface EntryDetailProps {
   canManage?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  layoutStyle?: LayoutStyle;
+  cardIndex?: number;
 }
 
 function getShareUrl(entry: EntryWithCategory) {
@@ -43,13 +47,17 @@ function getShareText(entry: EntryWithCategory) {
   return `【${entry.title}】${snippet}...`;
 }
 
-export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: EntryDetailProps) {
+function getCategoryEmoji(name?: string): string {
+  if (!name) return '📄';
+  const map: Record<string, string> = {
+    '技术开发': '💻', '产品设计': '🎨', '运营增长': '📈', '学习笔记': '📝',
+    '创意灵感': '💡', '行业资讯': '📰', '工具推荐': '🔧', '管理': '👔',
+  };
+  return map[name] || '📄';
+}
+
+function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCategory; shareOpen: boolean; setShareOpen: (v: boolean) => void }) {
   const [copied, setCopied] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-  const toggleVisibility = useToggleEntryVisibility();
-
-  if (!entry) return null;
-
   const shareUrl = getShareUrl(entry);
   const shareText = getShareText(entry);
 
@@ -59,45 +67,230 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
       setCopied(true);
       toast.success('链接已复制到剪贴板');
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('复制失败，请手动复制');
-    }
+    } catch { toast.error('复制失败'); }
   };
 
   const handleCopyAll = async () => {
     try {
       await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
       toast.success('内容和链接已复制');
-    } catch {
-      toast.error('复制失败');
-    }
+    } catch { toast.error('复制失败'); }
   };
 
-  const shareToWeChat = () => {
-    // WeChat doesn't have a direct web share URL, copy content for pasting
-    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-      toast.success('内容已复制，请打开微信粘贴分享');
-    });
-  };
+  return (
+    <Popover open={shareOpen} onOpenChange={setShareOpen}>
+      <PopoverTrigger asChild>
+        <Button size="icon" variant="ghost" className="h-8 w-8">
+          <Share2 className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-3" align="end">
+        <div className="space-y-3">
+          <p className="text-sm font-medium">分享到</p>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
+              onClick={() => navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => toast.success('内容已复制，请打开微信粘贴分享'))}>
+              <MessageCircle className="h-3.5 w-3.5" />微信
+            </Button>
+            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
+              onClick={() => window.open(`https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(entry.title)}&summary=${encodeURIComponent(shareText)}`, '_blank', 'width=600,height=500')}>
+              QQ
+            </Button>
+            <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
+              onClick={() => navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => { toast.success('内容已复制，正在打开小红书...'); window.open('https://www.xiaohongshu.com', '_blank'); })}>
+              小红书
+            </Button>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">分享链接</p>
+            <div className="flex gap-1.5">
+              <Input value={shareUrl} readOnly className="h-8 text-xs" onFocus={(e) => e.target.select()} />
+              <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={handleCopyLink}>
+                {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+              </Button>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" className="flex-1 gap-1.5 text-xs" onClick={handleCopyAll}>
+              <Copy className="h-3.5 w-3.5" />复制内容+链接
+            </Button>
+            <Button size="sm" variant="secondary" className="flex-1 gap-1.5 text-xs"
+              onClick={() => window.open(shareUrl, '_blank')}>
+              <ExternalLink className="h-3.5 w-3.5" />新窗口打开
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
-  const shareToQQ = () => {
-    const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(entry.title)}&summary=${encodeURIComponent(shareText)}`;
-    window.open(qqUrl, '_blank', 'width=600,height=500');
-  };
+/* ── Action buttons row (shared across styles) ── */
+function ActionButtons({ entry, canManage, onEdit, onDelete, onOpenChange, layoutStyle }: {
+  entry: EntryWithCategory; canManage?: boolean; onEdit?: () => void; onDelete?: () => void;
+  onOpenChange: (v: boolean) => void; layoutStyle?: LayoutStyle;
+}) {
+  const [shareOpen, setShareOpen] = useState(false);
+  const toggleVisibility = useToggleEntryVisibility();
 
-  const shareToXiaohongshu = () => {
-    // 小红书没有直接分享API，复制内容后打开
-    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-      toast.success('内容已复制，正在打开小红书...');
-      window.open('https://www.xiaohongshu.com', '_blank');
-    });
-  };
+  const isNeu = layoutStyle === 'neubrutalism';
+  const btnVariant = isNeu ? 'outline' as const : 'ghost' as const;
+  const btnClass = isNeu ? 'h-8 w-8 border-2 border-foreground/80 rounded-md' : 'h-8 w-8';
+  const deleteClass = isNeu
+    ? 'h-8 w-8 border-2 border-foreground/80 rounded-md text-destructive hover:text-destructive'
+    : 'h-8 w-8 text-destructive hover:text-destructive';
 
-  const handleToggleVisibility = () => {
-    toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private });
-  };
+  return (
+    <div className="flex gap-1 shrink-0">
+      <SharePopover entry={entry} shareOpen={shareOpen} setShareOpen={setShareOpen} />
+      {canManage && (
+        <>
+          <Button size="icon" variant={btnVariant} className={btnClass}
+            onClick={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
+            disabled={toggleVisibility.isPending}
+            title={entry.is_private ? '设为公开' : '设为私密'}>
+            {entry.is_private ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </Button>
+          <Button size="icon" variant={btnVariant} className={btnClass} onClick={onEdit}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant={btnVariant} className={deleteClass}
+            onClick={() => { onDelete?.(); onOpenChange(false); }}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
 
-  const isPrivate = entry.is_private;
+/* ═══════════════════════════════════════════════
+   EDITORIAL STYLE — white drawer, thin borders, light shadow
+   ═══════════════════════════════════════════════ */
+function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+  if (!entry) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto bg-background border border-border/60 shadow-lg rounded-lg p-0">
+        {/* Clean header with thin bottom border */}
+        <div className="px-6 pt-6 pb-4 border-b border-border/40">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <DialogHeader className="space-y-2">
+                <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+                  {entry.title}
+                </DialogTitle>
+                <DialogDescription asChild>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    {entry.categories && (
+                      <span className="text-primary font-medium">{entry.categories.name}</span>
+                    )}
+                    <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>
+                    {entry.contributors.length > 1 && (
+                      <span>· {entry.contributors.length} 位贡献者</span>
+                    )}
+                    {entry.is_private && (
+                      <Badge variant="outline" className="text-[10px] gap-0.5 h-5">
+                        <EyeOff className="h-3 w-3" />私密
+                      </Badge>
+                    )}
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} layoutStyle="dark-editorial" />
+          </div>
+        </div>
+        {/* Content area */}
+        <div className="px-6 py-5">
+          <MarkdownRenderer content={entry.content} />
+        </div>
+        {/* Minimal footer line */}
+        <div className="px-6 pb-4">
+          <div className="border-t border-border/30 pt-3 flex items-center justify-center">
+            <span className="text-[10px] tracking-[0.3em] text-muted-foreground/40 uppercase">end of document</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   NEUBRUTALISM STYLE — colored header, thick border, hard shadow
+   ═══════════════════════════════════════════════ */
+function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0 }: Omit<EntryDetailProps, 'layoutStyle'>) {
+  if (!entry) return null;
+
+  const headerColor = getCardColor(cardIndex);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-0 border-3 border-foreground/80 rounded-xl shadow-[8px_8px_0_hsl(var(--foreground)/0.8)] bg-background"
+        style={{ borderWidth: '3px' }}
+      >
+        {/* Colored header block matching card */}
+        <div className="px-6 pt-5 pb-4 rounded-t-xl" style={{ backgroundColor: headerColor }}>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <DialogHeader className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{getCategoryEmoji(entry.categories?.name)}</span>
+                  <DialogTitle className="text-xl font-black text-foreground/90">
+                    {entry.title}
+                  </DialogTitle>
+                </div>
+                <DialogDescription asChild>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {entry.categories && (
+                      <Badge className="bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
+                        {entry.categories.name}
+                      </Badge>
+                    )}
+                    <span className="text-xs text-foreground/50">
+                      {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
+                    </span>
+                    {entry.contributors.length > 1 && (
+                      <span className="text-xs text-foreground/50">
+                        · {entry.contributors.length} 位贡献者
+                      </span>
+                    )}
+                    {entry.is_private && (
+                      <Badge variant="outline" className="text-[10px] gap-0.5 border-foreground/30">
+                        <EyeOff className="h-3 w-3" />私密
+                      </Badge>
+                    )}
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} layoutStyle="neubrutalism" />
+          </div>
+        </div>
+
+        {/* Content with white background */}
+        <div className="px-6 py-5">
+          <MarkdownRenderer content={entry.content} />
+        </div>
+
+        {/* Brutalist footer */}
+        <div className="px-6 pb-5">
+          <div className="border-t-2 border-foreground/20 pt-3 flex items-center justify-center">
+            <span className="text-xs font-bold text-foreground/30 uppercase tracking-widest">— END —</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   DEFAULT / FALLBACK (original style)
+   ═══════════════════════════════════════════════ */
+function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+  if (!entry) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,134 +299,22 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
           <div className="flex items-start justify-between gap-2 pr-6">
             <div className="flex items-center gap-2 flex-wrap">
               <DialogTitle className="text-xl">{entry.title}</DialogTitle>
-              {isPrivate && (
+              {entry.is_private && (
                 <Badge variant="outline" className="text-xs gap-1">
-                  <EyeOff className="h-3 w-3" />
-                  私密
+                  <EyeOff className="h-3 w-3" />私密
                 </Badge>
               )}
             </div>
-            <div className="flex gap-1 shrink-0">
-              <Popover open={shareOpen} onOpenChange={setShareOpen}>
-                <PopoverTrigger asChild>
-                  <Button size="icon" variant="ghost" className="h-8 w-8">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-72 p-3" align="end">
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium">分享到</p>
-                    
-                    {/* Share buttons */}
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 gap-1.5 text-xs"
-                        onClick={shareToWeChat}
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        微信
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 gap-1.5 text-xs"
-                        onClick={shareToQQ}
-                      >
-                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                        </svg>
-                        QQ
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 gap-1.5 text-xs"
-                        onClick={shareToXiaohongshu}
-                      >
-                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        小红书
-                      </Button>
-                    </div>
-
-                    {/* Link copy */}
-                    <div className="space-y-1.5">
-                      <p className="text-xs text-muted-foreground">分享链接</p>
-                      <div className="flex gap-1.5">
-                        <Input
-                          value={shareUrl}
-                          readOnly
-                          className="h-8 text-xs"
-                          onFocus={(e) => e.target.select()}
-                        />
-                        <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={handleCopyLink}>
-                          {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Copy all + open in new tab */}
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="secondary" className="flex-1 gap-1.5 text-xs" onClick={handleCopyAll}>
-                        <Copy className="h-3.5 w-3.5" />
-                        复制内容+链接
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="flex-1 gap-1.5 text-xs"
-                        onClick={() => window.open(shareUrl, '_blank')}
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        新窗口打开
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              {canManage && (
-                <>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={handleToggleVisibility}
-                    disabled={toggleVisibility.isPending}
-                    title={isPrivate ? '设为公开' : '设为私密'}
-                  >
-                    {isPrivate ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onEdit}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => { onDelete?.(); onOpenChange(false); }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </div>
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} />
           </div>
           <DialogDescription asChild>
             <div className="flex items-center gap-2 pt-1">
-              {entry.categories && (
-                <Badge variant="secondary">{entry.categories.name}</Badge>
-              )}
+              {entry.categories && <Badge variant="secondary">{entry.categories.name}</Badge>}
               <span className="text-xs text-muted-foreground">
                 {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
               </span>
               {entry.contributors.length > 1 && (
-                <span className="text-xs text-muted-foreground">
-                  · {entry.contributors.length} 位贡献者
-                </span>
+                <span className="text-xs text-muted-foreground">· {entry.contributors.length} 位贡献者</span>
               )}
             </div>
           </DialogDescription>
@@ -244,4 +325,18 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
       </DialogContent>
     </Dialog>
   );
+}
+
+/* ── Main export: routes to style-specific detail ── */
+export function EntryDetail(props: EntryDetailProps) {
+  const { layoutStyle, ...rest } = props;
+
+  switch (layoutStyle) {
+    case 'dark-editorial':
+      return <EditorialDetail {...rest} />;
+    case 'neubrutalism':
+      return <NeuDetail {...rest} cardIndex={props.cardIndex} />;
+    default:
+      return <DefaultDetail {...rest} />;
+  }
 }

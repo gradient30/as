@@ -285,18 +285,27 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
                   <div key={cat.id} className="border rounded-lg p-3 space-y-2">
                     {editId === cat.id ? (
                       <>
-                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="分类名称" />
-                        <Select value={editParentId} onValueChange={setEditParentId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="所属一级分类" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {l1Categories.map(c => (
-                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Input value={editKeywords} onChange={(e) => setEditKeywords(e.target.value)} placeholder="关键词" />
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">分类名称</Label>
+                          <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="分类名称" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">所属一级分类</Label>
+                          <Select value={editParentId} onValueChange={setEditParentId}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="所属一级分类" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {l1Categories.map(c => (
+                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">关键词（逗号分隔）</Label>
+                          <Input value={editKeywords} onChange={(e) => setEditKeywords(e.target.value)} placeholder="关键词" />
+                        </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={async () => {
                             await handleUpdate();

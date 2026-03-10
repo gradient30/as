@@ -248,15 +248,7 @@ const Index = () => {
         )}
 
         {/* Editorial table header */}
-        {style === 'dark-editorial' && filteredEntries && filteredEntries.length > 0 && (
-          <div className="grid grid-cols-[40px_1fr_auto_auto_auto] items-center gap-4 px-2 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-2">
-            <span>#</span>
-            <span>标题 / 内容</span>
-            <span className="hidden md:block">标签</span>
-            <span className="hidden lg:block">分类</span>
-            <span className="text-right">时间</span>
-          </div>
-        )}
+        {/* Editorial section removed — now uses card grid */}
 
         {/* Entry grid/list */}
         {entriesLoading ? (

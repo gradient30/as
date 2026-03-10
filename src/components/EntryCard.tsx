@@ -115,53 +115,36 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
 function DarkEditorialCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit, onDelete, onToggleVisibility, index = 0 }: EntryCardProps) {
   return (
     <div
-      className="group relative cursor-pointer border-b border-border/50 py-4 px-2 transition-colors hover:bg-muted/30"
+      className="group relative cursor-pointer rounded-lg border border-border/50 p-4 transition-colors hover:bg-muted/30"
       onClick={onClick}
     >
       {isManageMode && canManage && (
         <ManageOverlay isPrivate={entry.is_private} onToggleVisibility={onToggleVisibility} onEdit={onEdit} onDelete={onDelete} />
       )}
 
-      <div className="grid grid-cols-[40px_1fr_auto_auto_auto] items-center gap-4">
-        {/* Number */}
-        <span className="text-2xl font-black text-primary/60 tabular-nums">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-lg">{getCategoryEmoji(entry.categories?.name)}</span>
+        <Badge variant="outline" className="text-[10px]">
+          {entry.categories?.name || '未知分类'}
+        </Badge>
+        {isOwn && <OwnBadge variant="inline" />}
+        {entry.is_private && (
+          <Badge variant="outline" className="text-[10px] gap-0.5">
+            <EyeOff className="h-3 w-3" />私密
+          </Badge>
+        )}
+      </div>
+
+      <h3 className="font-bold text-base mb-1 line-clamp-1">{entry.title}</h3>
+      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+        {snippet(entry.content).slice(0, 100)}
+      </p>
+
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>
+        <span className="text-2xl font-black text-primary/30 tabular-nums">
           {String(index + 1).padStart(2, '0')}
         </span>
-
-        {/* Title + content */}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-lg">{getCategoryEmoji(entry.categories?.name)}</span>
-            <h3 className="font-bold text-base truncate">{entry.title}</h3>
-            {isOwn && <OwnBadge variant="inline" />}
-            {entry.is_private && (
-              <Badge variant="outline" className="text-[10px] gap-0.5 shrink-0">
-                <EyeOff className="h-3 w-3" />私密
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {snippet(entry.content).slice(0, 80)}...
-          </p>
-        </div>
-
-        {/* Tags */}
-        <div className="hidden md:block">
-          <Badge variant="outline" className="text-xs">
-            {entry.categories?.name || '未知分类'}
-          </Badge>
-        </div>
-
-        {/* Category parent (from categories table) - placeholder */}
-        <div className="hidden lg:block text-sm text-muted-foreground whitespace-nowrap">
-          {entry.categories?.name || '未知分类'}
-        </div>
-
-        {/* Time */}
-        <div className="text-right text-xs text-muted-foreground whitespace-nowrap">
-          <div>{format(new Date(entry.created_at), 'HH:mm')}</div>
-          <div>{format(new Date(entry.created_at), 'yyyy-MM-dd')}</div>
-        </div>
       </div>
     </div>
   );

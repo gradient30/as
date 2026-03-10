@@ -46,7 +46,10 @@ const Index = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [manageMode, setManageMode] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
+  const { user, signOut } = useAuth();
+  const isGlobalAdmin = useIsAdmin();
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
   const { data: categories } = useCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
@@ -54,7 +57,7 @@ const Index = () => {
   const authorToken = getAuthorToken();
   const { dark, toggle: toggleDark } = useDarkMode();
 
-  const hasAdminRights = adminCategoryIds && adminCategoryIds.size > 0;
+  const hasAdminRights = isGlobalAdmin || (adminCategoryIds && adminCategoryIds.size > 0);
 
   // Check if user can manage a specific entry
   const canManageEntry = (entry: EntryWithCategory) => {

@@ -221,6 +221,7 @@ const Index = () => {
                 entry={entry}
                 isManageMode={manageMode}
                 canManage={canManageEntry(entry)}
+                isOwn={entry.author_token === authorToken}
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onClick={() => {

@@ -165,7 +165,7 @@ const Index = () => {
               </div>
               <div>
                 <h2 className="text-xs font-black tracking-[0.2em] text-[hsl(0,0%,85%)] uppercase font-mono">KNOWLEDGE</h2>
-                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.5)] font-mono">NEURAL ARCHIVE v2.0</p>
+                <p className="text-[9px] tracking-[0.15em] text-[hsl(180,80%,50%/0.7)] font-mono">NEURAL ARCHIVE v2.0</p>
               </div>
             </div>
             <div className="flex items-center gap-6 text-[11px] font-mono tracking-wider">

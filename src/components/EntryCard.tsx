@@ -154,7 +154,7 @@ function DarkEditorialCard({ entry, onClick, isManageMode, canManage, isOwn, onE
 
         {/* Category parent (from categories table) - placeholder */}
         <div className="hidden lg:block text-sm text-muted-foreground whitespace-nowrap">
-          {entry.categories?.name || '未分类'}
+          {entry.categories?.name || '未知分类'}
         </div>
 
         {/* Time */}

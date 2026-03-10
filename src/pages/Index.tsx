@@ -52,6 +52,7 @@ const Index = () => {
   const [manageMode, setManageMode] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'discover' | 'mine'>('discover');
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
@@ -81,12 +82,21 @@ const Index = () => {
   };
 
   const filteredEntries = useMemo(() => {
-    if (!entries || !searchQuery.trim()) return entries;
-    const q = searchQuery.toLowerCase();
-    return entries.filter(
-      (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
-    );
-  }, [entries, searchQuery]);
+    let result = entries;
+    if (!result) return result;
+    // View mode filter
+    if (viewMode === 'mine') {
+      result = result.filter(e => isOwnEntry(e));
+    }
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (e) => e.title.toLowerCase().includes(q) || e.content.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [entries, searchQuery, viewMode, authorToken, user]);
 
   const adminCategories = categories?.filter(c => c.created_by_token === authorToken) || [];
 
@@ -138,69 +148,62 @@ const Index = () => {
 
       {/* Header — varies by style */}
       {style === 'bento-glass' && (
-        <header className="container mx-auto px-4 pt-8 pb-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-1">知 识 库</p>
-          <div className="flex items-end justify-between">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight">My Brain</h1>
+        <header className="container mx-auto px-4 pt-6 pb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-0.5">知 识 库</p>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight">My Brain</h1>
+            </div>
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">{entryCount} 条笔记</Badge>
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">{entryCount} 条</Badge>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
                 setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
             </div>
           </div>
+          <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="glass" />
         </header>
       )}
 
       {style === 'dark-editorial' && (
-        <header className="container mx-auto px-4 pt-6 pb-6">
-          <nav className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-6">
+        <header className="container mx-auto px-4 pt-6 pb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
               <h1 className="text-lg font-black uppercase tracking-widest">Knowledge</h1>
-              <span className="text-sm text-muted-foreground hidden sm:inline">发现</span>
-              <span className="text-sm text-muted-foreground hidden sm:inline">我的</span>
+              <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="editorial" />
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground hidden sm:inline">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 {new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, ' · ')}
               </span>
               <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
                 setManageMode={setManageMode} signOut={signOut} setAuthOpen={setAuthOpen}
                 setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen} />
             </div>
-          </nav>
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-primary mb-2">个 人 知 识 库</p>
-              <h2 className="text-5xl md:text-7xl font-black uppercase leading-none tracking-tighter">
-                <span className="block">MY</span>
-                <span className="block text-muted-foreground/30">BRAIN</span>
-              </h2>
-            </div>
-            <div className="flex gap-6 items-end">
-              {[
-                { n: entryCount, label: '笔记总数' },
-                { n: todayCount, label: '今日更新' },
-                { n: myCount, label: '我的' },
-              ].map(s => (
-                <div key={s.label} className="text-center">
-                  <p className="text-3xl font-black text-primary">{s.n}</p>
-                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
-                </div>
-              ))}
-            </div>
+          </div>
+          <div className="flex gap-6">
+            {[
+              { n: entryCount, label: '笔记总数' },
+              { n: todayCount, label: '今日更新' },
+              { n: myCount, label: '我的' },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <p className="text-2xl font-black text-primary">{s.n}</p>
+                <p className="text-[10px] text-muted-foreground">{s.label}</p>
+              </div>
+            ))}
           </div>
         </header>
       )}
 
       {style === 'neubrutalism' && (
         <header className="container mx-auto px-4 pt-6 pb-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">🧠</span>
+              <span className="text-2xl">🧠</span>
               <div>
-                <h1 className="text-2xl font-black uppercase tracking-wider">Knowledge</h1>
-                <p className="text-xs text-muted-foreground">个人知识库 · v2.0</p>
+                <h1 className="text-xl font-black uppercase tracking-wider">Knowledge</h1>
+                <p className="text-[10px] text-muted-foreground">个人知识库</p>
               </div>
             </div>
             <HeaderActions user={user} hasAdminRights={hasAdminRights} manageMode={manageMode}
@@ -208,6 +211,7 @@ const Index = () => {
               setSubmitOpen={setSubmitOpen} setCategoryManagerOpen={setCategoryManagerOpen}
               neuStyle />
           </div>
+          <ViewTabs viewMode={viewMode} setViewMode={setViewMode} variant="neu" />
         </header>
       )}
 
@@ -314,6 +318,72 @@ const Index = () => {
     </div>
   );
 };
+
+function ViewTabs({ viewMode, setViewMode, variant }: {
+  viewMode: 'discover' | 'mine';
+  setViewMode: (v: 'discover' | 'mine') => void;
+  variant: 'glass' | 'editorial' | 'neu';
+}) {
+  const tabs = [
+    { key: 'discover' as const, label: '发现' },
+    { key: 'mine' as const, label: '我的' },
+  ];
+
+  if (variant === 'editorial') {
+    return (
+      <div className="flex items-center gap-4">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setViewMode(t.key)}
+            className={`text-sm transition-colors ${viewMode === t.key ? 'text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  if (variant === 'neu') {
+    return (
+      <div className="flex gap-2">
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setViewMode(t.key)}
+            className={`px-4 py-1.5 text-sm rounded-lg border-2 transition-all font-bold ${
+              viewMode === t.key
+                ? 'border-foreground/80 bg-foreground text-background'
+                : 'border-foreground/20 bg-background text-foreground hover:border-foreground/50'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // glass
+  return (
+    <div className="flex gap-2">
+      {tabs.map(t => (
+        <button
+          key={t.key}
+          onClick={() => setViewMode(t.key)}
+          className={`px-3 py-1 text-sm rounded-full backdrop-blur transition-all ${
+            viewMode === t.key
+              ? 'bg-primary text-primary-foreground font-bold'
+              : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+          }`}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // ===== Sub-components =====
 

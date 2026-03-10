@@ -185,7 +185,7 @@ const Index = () => {
           <header className="container mx-auto px-4 pt-8 pb-4">
             <div className="flex items-end justify-between mb-6">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.6)] font-mono mb-2 flex items-center gap-2">
+                <p className="text-[11px] uppercase tracking-[0.4em] text-[hsl(180,100%,50%/0.8)] font-mono mb-2 flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[hsl(180,100%,50%)] animate-pulse-cyber" />
                   PERSONAL KNOWLEDGE SYSTEM
                 </p>

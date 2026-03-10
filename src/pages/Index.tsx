@@ -7,11 +7,12 @@ import { SubmitDialog } from '@/components/SubmitDialog';
 import { EditDialog } from '@/components/EditDialog';
 import { AdminPanel } from '@/components/AdminPanel';
 import { AuthDialog } from '@/components/AuthDialog';
+import { CategoryManager } from '@/components/CategoryManager';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, User } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, Tags } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {
@@ -47,6 +48,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [manageMode, setManageMode] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
@@ -115,14 +117,25 @@ const Index = () => {
                   {user.email}
                 </span>
                 {hasAdminRights && (
-                  <Button
-                    size="sm"
-                    variant={manageMode ? 'default' : 'outline'}
-                    onClick={() => setManageMode(!manageMode)}
-                  >
-                    {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                    {manageMode ? '浏览模式' : '管理模式'}
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant={manageMode ? 'default' : 'outline'}
+                      onClick={() => setManageMode(!manageMode)}
+                    >
+                      {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                      {manageMode ? '浏览模式' : '管理模式'}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9"
+                      onClick={() => setCategoryManagerOpen(true)}
+                      title="分类管理"
+                    >
+                      <Tags className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
                 <Button size="icon" variant="ghost" onClick={signOut} className="h-9 w-9" title="退出登录">
                   <LogOut className="h-4 w-4" />
@@ -208,6 +221,7 @@ const Index = () => {
                 entry={entry}
                 isManageMode={manageMode}
                 canManage={canManageEntry(entry)}
+                isOwn={entry.author_token === authorToken}
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onClick={() => {
@@ -242,6 +256,7 @@ const Index = () => {
       />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>

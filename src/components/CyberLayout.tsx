@@ -67,16 +67,16 @@ function EntryListItem({ entry, isSelected, onClick }: {
       }`}
     >
       <div className="flex items-center justify-between mb-0.5">
-        <h4 className="text-xs font-bold text-[hsl(var(--cyber-text))] line-clamp-1 flex items-center gap-1.5">
-          <span className="text-sm">{getCategoryEmoji(entry.categories?.name)}</span>
+      <h4 className="text-sm font-bold text-[hsl(var(--cyber-text))] line-clamp-1 flex items-center gap-1.5">
+          <span className="text-base">{getCategoryEmoji(entry.categories?.name)}</span>
           {entry.title}
           {entry.is_private && <EyeOff className="h-3 w-3 text-[hsl(var(--cyber-accent)/0.5)] flex-shrink-0" />}
         </h4>
-        <span className="text-[9px] text-[hsl(var(--cyber-text-dim))] font-mono ml-2 flex-shrink-0">
+        <span className="text-[10px] text-[hsl(var(--cyber-text-secondary))] font-mono ml-2 flex-shrink-0">
           {format(new Date(entry.created_at), 'HH:mm')}
         </span>
       </div>
-      <p className="text-[10px] text-[hsl(var(--cyber-text-muted))] line-clamp-1 pl-5">
+      <p className="text-xs text-[hsl(var(--cyber-text-muted))] line-clamp-1 pl-6">
         {snippet.slice(0, 80)}
       </p>
     </div>
@@ -137,7 +137,7 @@ function CategoryGroup({ categoryName, entries, selectedEntry, onSelect, default
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono tracking-wider text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))] hover:bg-[hsl(var(--cyber-surface-hover))] transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider text-[hsl(var(--cyber-text-secondary))] hover:text-[hsl(var(--cyber-text))] hover:bg-[hsl(var(--cyber-surface-hover))] transition-colors"
       >
         {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         <span className="text-sm">{getCategoryEmoji(categoryName)}</span>
@@ -366,10 +366,10 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
   const reads = getReadCount(entry.id);
 
   return (
-    <div className="p-4 space-y-6 text-[11px] font-mono">
+    <div className="p-4 space-y-6 text-xs font-mono">
       <div>
-        <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">DOC INFO</h3>
-        <div className="space-y-2">
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">DOC INFO</h3>
+        <div className="space-y-2.5">
           {[
             { label: '分类', value: entry.categories?.name || '未分类' },
             { label: '创建', value: format(new Date(entry.created_at), 'yyyy-MM-dd') },
@@ -377,8 +377,8 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
             { label: '阅读量', value: String(reads) },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between">
-              <span className="text-[hsl(var(--cyber-text-dim))]">{item.label}</span>
-              <span className="text-[hsl(var(--cyber-text-secondary))]">{item.value}</span>
+              <span className="text-[hsl(var(--cyber-text-secondary))]">{item.label}</span>
+              <span className="text-[hsl(var(--cyber-text))] font-semibold">{item.value}</span>
             </div>
           ))}
         </div>
@@ -386,12 +386,12 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
 
       {headings.length > 0 && (
         <div>
-          <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">目 录</h3>
-          <div className="space-y-1.5">
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">目 录</h3>
+          <div className="space-y-2">
             {headings.map((h, i) => (
               <div key={i} className="flex items-start gap-1.5" style={{ paddingLeft: `${(h.level - 1) * 12}px` }}>
                 <span className="text-[hsl(var(--cyber-accent)/0.4)] mt-1">○</span>
-                <span className="text-[hsl(var(--cyber-text-muted))] hover:text-[hsl(var(--cyber-text))] cursor-pointer transition-colors">{h.text}</span>
+                <span className="text-[hsl(var(--cyber-text))] hover:text-[hsl(var(--cyber-accent-text))] cursor-pointer transition-colors">{h.text}</span>
               </div>
             ))}
           </div>
@@ -399,10 +399,10 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
       )}
 
       <div>
-        <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">标 签</h3>
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">标 签</h3>
         <div className="flex flex-wrap gap-1.5">
           {[entry.categories?.name, ...(entry.content.match(/[\u4e00-\u9fff]{2,4}/g)?.slice(0, 4) || [])].filter(Boolean).map((tag, i) => (
-            <span key={i} className="text-[10px] px-2 py-0.5 border border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-accent-text))] hover:border-[hsl(var(--cyber-accent)/0.4)] cursor-pointer transition-colors">
+            <span key={i} className="text-xs px-2 py-0.5 border border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-text))] hover:border-[hsl(var(--cyber-accent)/0.4)] cursor-pointer transition-colors">
               {tag}
             </span>
           ))}

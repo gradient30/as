@@ -282,50 +282,79 @@ export function CategoryManager({ open, onOpenChange }: CategoryManagerProps) {
             <div className="space-y-2">
               {pendingCategories && pendingCategories.length > 0 ? (
                 pendingCategories.map(cat => (
-                  <div key={cat.id} className="flex items-center justify-between border rounded-lg p-3 gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm truncate">{cat.name}</p>
-                        <Badge variant="outline" className="text-[10px] shrink-0">待审核</Badge>
+                  <div key={cat.id} className="border rounded-lg p-3 space-y-2">
+                    {editId === cat.id ? (
+                      <>
+                        <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="分类名称" />
+                        <Select value={editParentId} onValueChange={setEditParentId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="所属一级分类" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {l1Categories.map(c => (
+                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input value={editKeywords} onChange={(e) => setEditKeywords(e.target.value)} placeholder="关键词" />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={async () => {
+                            await handleUpdate();
+                            approveCategory.mutate({ id: cat.id });
+                          }} disabled={loading}>
+                            <Check className="h-3.5 w-3.5" />
+                            保存并通过
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>取消</Button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm truncate">{cat.name}</p>
+                            <Badge variant="outline" className="text-[10px] shrink-0">待审核</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            关键词：{cat.keywords.join(', ')}
+                          </p>
+                          {cat.parent_id && (
+                            <p className="text-xs text-muted-foreground">
+                              归属：{l1Categories.find(c => c.id === cat.parent_id)?.name || '未分类'}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-green-600 hover:text-green-700"
+                            onClick={() => handleApprove(cat)}
+                            title="审核通过"
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() => handleReject(cat.id)}
+                            title="拒绝"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => startEdit(cat)}
+                            title="编辑后通过"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        关键词：{cat.keywords.join(', ')}
-                      </p>
-                      {cat.parent_id && (
-                        <p className="text-xs text-muted-foreground">
-                          归属：{l1Categories.find(c => c.id === cat.parent_id)?.name || '未分类'}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 text-green-600 hover:text-green-700"
-                        onClick={() => handleApprove(cat)}
-                        title="审核通过"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7 text-destructive hover:text-destructive"
-                        onClick={() => handleReject(cat.id)}
-                        title="拒绝"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => startEdit(cat)}
-                        title="编辑后通过"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                    )}
                   </div>
                 ))
               ) : (

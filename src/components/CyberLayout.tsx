@@ -590,7 +590,7 @@ export function CyberLayout({
             <VirtualizedEntryList
               entries={flatEntries}
               selectedEntry={selectedEntry}
-              onSelect={setSelectedEntry}
+              onSelect={handleSelectEntry}
             />
           ) : filteredGroups.length > 0 ? (
             <div className="flex-1 overflow-y-auto divide-y divide-[hsl(var(--cyber-border-subtle))]">

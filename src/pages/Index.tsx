@@ -469,4 +469,72 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
   );
 }
 
+function SkeletonLoader({ style }: { style: string }) {
+  if (style === 'dark-editorial') {
+    return (
+      <div className="space-y-0">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-4 py-4 px-2 border-b border-border/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}>
+            <Skeleton className="h-8 w-8 rounded" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+            <Skeleton className="h-5 w-16 rounded hidden md:block" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (style === 'neubrutalism') {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-xl border-2 border-foreground/20 p-5 space-y-3 animate-fade-in"
+            style={{
+              animationDelay: `${i * 100}ms`,
+              animationFillMode: 'both',
+              backgroundColor: `hsl(${[50, 160, 270, 350, 200, 30][i % 6]} ${i % 2 === 0 ? '60%' : '70%'} 90% / 0.4)`,
+            }}
+          >
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <Skeleton className="h-5 w-24 rounded-sm" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+            <div className="border-t border-foreground/10 pt-3 flex justify-between">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-7 w-7 rounded-md" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Bento Glass
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 dark:from-white/8 dark:to-white/[0.02] border border-white/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
+          style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
+        >
+          <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
+          <Skeleton className={`h-5 w-24 rounded bg-white/10`} />
+          <Skeleton className={`${i === 0 ? 'h-8' : 'h-6'} w-3/4 bg-white/10`} />
+          <Skeleton className="h-4 w-full bg-white/10" />
+          {i === 0 && <Skeleton className="h-4 w-2/3 bg-white/10" />}
+          <Skeleton className="h-3 w-32 bg-white/10 mt-auto" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default Index;

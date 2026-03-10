@@ -366,10 +366,10 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
   const reads = getReadCount(entry.id);
 
   return (
-    <div className="p-4 space-y-6 text-[11px] font-mono">
+    <div className="p-4 space-y-6 text-xs font-mono">
       <div>
-        <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">DOC INFO</h3>
-        <div className="space-y-2">
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">DOC INFO</h3>
+        <div className="space-y-2.5">
           {[
             { label: '分类', value: entry.categories?.name || '未分类' },
             { label: '创建', value: format(new Date(entry.created_at), 'yyyy-MM-dd') },
@@ -377,8 +377,8 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
             { label: '阅读量', value: String(reads) },
           ].map(item => (
             <div key={item.label} className="flex items-center justify-between">
-              <span className="text-[hsl(var(--cyber-text-dim))]">{item.label}</span>
-              <span className="text-[hsl(var(--cyber-text-secondary))]">{item.value}</span>
+              <span className="text-[hsl(var(--cyber-text-secondary))]">{item.label}</span>
+              <span className="text-[hsl(var(--cyber-text))] font-semibold">{item.value}</span>
             </div>
           ))}
         </div>

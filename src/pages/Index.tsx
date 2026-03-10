@@ -522,7 +522,7 @@ function SkeletonLoader({ style }: { style: string }) {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 dark:from-white/8 dark:to-white/[0.02] border border-white/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
+          className={`rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/5 dark:from-cyan-400/8 dark:to-blue-900/5 border border-cyan-300/15 animate-fade-in ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
           style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'both' }}
         >
           <Skeleton className="h-10 w-10 rounded-full bg-white/10" />

@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useToggleEntryVisibility } from '@/hooks/useEntries';
+import { useToggleEntryVisibility, useRecordView } from '@/hooks/useEntries';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { toast } from 'sonner';

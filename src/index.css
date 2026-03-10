@@ -55,6 +55,27 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Cyber theme - Light */
+  :root {
+    --cyber-bg: 220 20% 96%;
+    --cyber-sidebar: 220 20% 94%;
+    --cyber-content-bg: 220 15% 97%;
+    --cyber-surface-hover: 220 15% 90%;
+    --cyber-input-bg: 220 15% 92%;
+    --cyber-text: 220 30% 15%;
+    --cyber-text-secondary: 220 20% 30%;
+    --cyber-text-muted: 220 15% 50%;
+    --cyber-text-dim: 220 10% 60%;
+    --cyber-accent: 180 100% 30%;
+    --cyber-accent-text: 180 80% 35%;
+    --cyber-accent-contrast: 0 0% 100%;
+    --cyber-heading: 25 100% 45%;
+    --cyber-tag-bg: 25 100% 50%;
+    --cyber-tag-text: 0 0% 100%;
+    --cyber-border: 220 15% 85%;
+    --cyber-border-subtle: 220 10% 90%;
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -91,6 +112,25 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Cyber theme - Dark */
+    --cyber-bg: 220 50% 5%;
+    --cyber-sidebar: 220 45% 7%;
+    --cyber-content-bg: 220 45% 6%;
+    --cyber-surface-hover: 220 40% 12%;
+    --cyber-input-bg: 220 40% 8%;
+    --cyber-text: 0 0% 90%;
+    --cyber-text-secondary: 210 15% 75%;
+    --cyber-text-muted: 210 20% 55%;
+    --cyber-text-dim: 210 20% 45%;
+    --cyber-accent: 180 100% 50%;
+    --cyber-accent-text: 180 80% 55%;
+    --cyber-accent-contrast: 220 50% 5%;
+    --cyber-heading: 25 100% 55%;
+    --cyber-tag-bg: 25 100% 50%;
+    --cyber-tag-text: 0 0% 0%;
+    --cyber-border: 220 30% 18%;
+    --cyber-border-subtle: 220 25% 12%;
   }
 }
 

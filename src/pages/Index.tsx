@@ -61,6 +61,7 @@ const Index = () => {
 
   // Check if user can manage a specific entry
   const canManageEntry = (entry: EntryWithCategory) => {
+    if (isGlobalAdmin) return true;
     if (entry.author_token === authorToken) return true;
     if (entry.category_id && adminCategoryIds?.has(entry.category_id)) return true;
     return false;

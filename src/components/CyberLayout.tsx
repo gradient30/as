@@ -344,7 +344,8 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
             prose-strong:text-[hsl(var(--cyber-text))]
             prose-a:text-[hsl(var(--cyber-accent))]
             prose-code:text-[hsl(var(--cyber-accent-text))]
-            prose-li:text-[hsl(var(--cyber-text-secondary))]"
+            prose-li:text-[hsl(var(--cyber-text-secondary))]
+            [&_p]:!text-[length:inherit] [&_li]:!text-[length:inherit] [&_blockquote]:!text-[length:inherit]"
           style={{ fontSize: `${fontSizeValues[fontSize]}px` }}
         >
           <MarkdownRenderer content={entry.content} />

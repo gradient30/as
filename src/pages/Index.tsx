@@ -55,7 +55,7 @@ const Index = () => {
   const isGlobalAdmin = useIsAdmin();
   // Admin sees ALL entries (including private)
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter, { showAll: isGlobalAdmin });
-  const { data: categories } = useCategories();
+  const { data: categories } = useVisibleCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
   const deleteEntry = useDeleteEntry();
   const toggleVisibility = useToggleEntryVisibility();

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import logoFish from '@/assets/logo-fish.png';
-import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
+import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility, useRecordView, useSmartCategoryEntries, isSmartCategory } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { useLayoutStyle } from '@/hooks/useLayoutStyle';

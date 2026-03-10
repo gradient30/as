@@ -137,7 +137,7 @@ function CategoryGroup({ categoryName, entries, selectedEntry, onSelect, default
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-1.5 text-[10px] font-mono tracking-wider text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(var(--cyber-text))] hover:bg-[hsl(var(--cyber-surface-hover))] transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-mono tracking-wider text-[hsl(var(--cyber-text-secondary))] hover:text-[hsl(var(--cyber-text))] hover:bg-[hsl(var(--cyber-surface-hover))] transition-colors"
       >
         {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         <span className="text-sm">{getCategoryEmoji(categoryName)}</span>

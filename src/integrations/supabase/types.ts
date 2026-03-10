@@ -108,11 +108,13 @@ export type Database = {
           created_at: string
           id: string
           is_private: boolean
+          last_viewed_at: string | null
           share_token: string | null
           status: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at: string
           user_id: string | null
+          view_count: number
         }
         Insert: {
           author_token: string
@@ -122,11 +124,13 @@ export type Database = {
           created_at?: string
           id?: string
           is_private?: boolean
+          last_viewed_at?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
           title: string
           updated_at?: string
           user_id?: string | null
+          view_count?: number
         }
         Update: {
           author_token?: string
@@ -136,11 +140,13 @@ export type Database = {
           created_at?: string
           id?: string
           is_private?: boolean
+          last_viewed_at?: string | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["entry_status"]
           title?: string
           updated_at?: string
           user_id?: string | null
+          view_count?: number
         }
         Relationships: [
           {
@@ -181,6 +187,38 @@ export type Database = {
           {
             foreignKeyName: "entry_merges_target_entry_id_fkey"
             columns: ["target_entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entry_views: {
+        Row: {
+          entry_id: string
+          id: string
+          viewed_at: string
+          viewer_token: string
+          viewer_user_id: string | null
+        }
+        Insert: {
+          entry_id: string
+          id?: string
+          viewed_at?: string
+          viewer_token: string
+          viewer_user_id?: string | null
+        }
+        Update: {
+          entry_id?: string
+          id?: string
+          viewed_at?: string
+          viewer_token?: string
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_views_entry_id_fkey"
+            columns: ["entry_id"]
             isOneToOne: false
             referencedRelation: "entries"
             referencedColumns: ["id"]

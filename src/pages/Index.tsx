@@ -537,34 +537,8 @@ function CategoryFilters({ categories, categoryFilter, setCategoryFilter, style 
     );
   }
 
-  // Bento Glass (cyberpunk)
-  return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
-          !categoryFilter
-            ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-             : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
-        }`}
-        onClick={() => setCategoryFilter(undefined)}
-      >
-        全部
-      </button>
-      {l1Cats.map((cat: CategoryRow) => (
-        <button
-          key={cat.id}
-          className={`px-4 py-1.5 text-[11px] font-mono tracking-wider transition-all border ${
-            categoryFilter === cat.id
-              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
-              : 'border-[hsl(220,30%,30%)] text-[hsl(210,20%,65%)] hover:border-[hsl(180,100%,50%/0.3)] hover:text-[hsl(180,100%,60%)]'
-          }`}
-          onClick={() => setCategoryFilter(cat.id)}
-        >
-          {cat.name}
-        </button>
-      ))}
-    </div>
-  );
+  // default fallback
+  return null;
 }
 
 function SkeletonLoader({ style }: { style: string }) {

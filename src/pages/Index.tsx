@@ -239,7 +239,7 @@ const Index = () => {
         onEdit={() => selectedEntry && handleEdit(selectedEntry)}
         onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
       />
-      <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>

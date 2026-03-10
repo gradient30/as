@@ -256,6 +256,7 @@ const Index = () => {
       />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
+      <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>

@@ -44,6 +44,7 @@ const useDarkMode = () => {
 const Index = () => {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<EntryWithCategory | null>(null);
+  const [selectedEntryIndex, setSelectedEntryIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<EntryWithCategory | null>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -327,7 +328,7 @@ const Index = () => {
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
-                onClick={() => { setSelectedEntry(entry); setDetailOpen(true); }}
+                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); }}
                 layoutStyle={style}
                 index={i}
               />
@@ -350,7 +351,9 @@ const Index = () => {
       <EntryDetail entry={selectedEntry} open={detailOpen} onOpenChange={setDetailOpen}
         canManage={selectedEntry ? canManageEntry(selectedEntry) : false}
         onEdit={() => selectedEntry && handleEdit(selectedEntry)}
-        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)} />
+        onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
+        layoutStyle={style}
+        cardIndex={selectedEntryIndex} />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
       <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
       <CategoryManager open={categoryManagerOpen} onOpenChange={setCategoryManagerOpen} />

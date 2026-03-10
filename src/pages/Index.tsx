@@ -117,7 +117,7 @@ const Index = () => {
 
   // Background classes per style
   const bgClass = style === 'bento-glass'
-    ? 'min-h-screen bg-gradient-to-br from-purple-500/20 via-pink-400/10 to-orange-300/10 dark:from-purple-900/30 dark:via-pink-900/10 dark:to-background'
+    ? 'min-h-screen bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-teal-400/5 dark:from-cyan-900/30 dark:via-blue-950/20 dark:to-background'
     : style === 'dark-editorial'
     ? 'min-h-screen bg-background'
     : 'min-h-screen bg-[hsl(40,30%,95%)] dark:bg-background';

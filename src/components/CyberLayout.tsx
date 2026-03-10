@@ -399,10 +399,10 @@ function DocInfoSidebar({ entry }: { entry: EntryWithCategory }) {
       )}
 
       <div>
-        <h3 className="text-[10px] tracking-[0.2em] text-[hsl(var(--cyber-text-dim))] uppercase mb-3">标 签</h3>
+        <h3 className="text-xs tracking-[0.2em] text-[hsl(var(--cyber-text-secondary))] uppercase mb-3 font-bold">标 签</h3>
         <div className="flex flex-wrap gap-1.5">
           {[entry.categories?.name, ...(entry.content.match(/[\u4e00-\u9fff]{2,4}/g)?.slice(0, 4) || [])].filter(Boolean).map((tag, i) => (
-            <span key={i} className="text-[10px] px-2 py-0.5 border border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-accent-text))] hover:border-[hsl(var(--cyber-accent)/0.4)] cursor-pointer transition-colors">
+            <span key={i} className="text-xs px-2 py-0.5 border border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-text))] hover:border-[hsl(var(--cyber-accent)/0.4)] cursor-pointer transition-colors">
               {tag}
             </span>
           ))}

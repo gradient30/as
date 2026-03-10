@@ -1,10 +1,7 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +11,7 @@ import {
 } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
-import { Pencil, Trash2, Share2, EyeOff, Eye, Check, Copy, ExternalLink, MessageCircle } from 'lucide-react';
+import { Pencil, Trash2, Share2, EyeOff, Eye, Check, Copy, ExternalLink, MessageCircle, X } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -126,9 +123,9 @@ function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCate
 }
 
 /* ── Action buttons row (shared across styles) ── */
-function ActionButtons({ entry, canManage, onEdit, onDelete, onOpenChange, layoutStyle }: {
+function ActionButtons({ entry, canManage, onEdit, onDelete, onClose, layoutStyle }: {
   entry: EntryWithCategory; canManage?: boolean; onEdit?: () => void; onDelete?: () => void;
-  onOpenChange: (v: boolean) => void; layoutStyle?: LayoutStyle;
+  onClose: () => void; layoutStyle?: LayoutStyle;
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const toggleVisibility = useToggleEntryVisibility();
@@ -155,51 +152,50 @@ function ActionButtons({ entry, canManage, onEdit, onDelete, onOpenChange, layou
             <Pencil className="h-4 w-4" />
           </Button>
           <Button size="icon" variant={btnVariant} className={deleteClass}
-            onClick={() => { onDelete?.(); onOpenChange(false); }}>
+            onClick={() => { onDelete?.(); onClose(); }}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </>
       )}
+      <Button size="icon" variant={btnVariant} className={btnClass} onClick={onClose}>
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════
-   EDITORIAL STYLE — white drawer, thin borders, light shadow
+   EDITORIAL STYLE — right drawer, white, thin borders, light shadow
    ═══════════════════════════════════════════════ */
 function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
   if (!entry) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto bg-background border border-border/60 shadow-lg rounded-lg p-0">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:w-[520px] md:w-[600px] lg:w-[680px] p-0 border-l border-border/60 shadow-xl overflow-y-auto [&>button]:hidden">
         {/* Clean header with thin bottom border */}
-        <div className="px-6 pt-6 pb-4 border-b border-border/40">
+        <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur-sm z-10">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <DialogHeader className="space-y-2">
-                <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
-                  {entry.title}
-                </DialogTitle>
-                <DialogDescription asChild>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    {entry.categories && (
-                      <span className="text-primary font-medium">{entry.categories.name}</span>
-                    )}
-                    <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>
-                    {entry.contributors.length > 1 && (
-                      <span>· {entry.contributors.length} 位贡献者</span>
-                    )}
-                    {entry.is_private && (
-                      <Badge variant="outline" className="text-[10px] gap-0.5 h-5">
-                        <EyeOff className="h-3 w-3" />私密
-                      </Badge>
-                    )}
-                  </div>
-                </DialogDescription>
-              </DialogHeader>
+            <div className="flex-1 min-w-0 space-y-2">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                {entry.title}
+              </h2>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                {entry.categories && (
+                  <span className="text-primary font-medium">{entry.categories.name}</span>
+                )}
+                <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>
+                {entry.contributors.length > 1 && (
+                  <span>· {entry.contributors.length} 位贡献者</span>
+                )}
+                {entry.is_private && (
+                  <Badge variant="outline" className="text-[10px] gap-0.5 h-5">
+                    <EyeOff className="h-3 w-3" />私密
+                  </Badge>
+                )}
+              </div>
             </div>
-            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} layoutStyle="dark-editorial" />
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="dark-editorial" />
           </div>
         </div>
         {/* Content area */}
@@ -207,18 +203,18 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
           <MarkdownRenderer content={entry.content} />
         </div>
         {/* Minimal footer line */}
-        <div className="px-6 pb-4">
+        <div className="px-6 pb-6">
           <div className="border-t border-border/30 pt-3 flex items-center justify-center">
             <span className="text-[10px] tracking-[0.3em] text-muted-foreground/40 uppercase">end of document</span>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 /* ═══════════════════════════════════════════════
-   NEUBRUTALISM STYLE — colored header, thick border, hard shadow
+   NEUBRUTALISM STYLE — right drawer, colored header, thick border, hard shadow
    ═══════════════════════════════════════════════ */
 function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0 }: Omit<EntryDetailProps, 'layoutStyle'>) {
   if (!entry) return null;
@@ -226,104 +222,95 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
   const headerColor = getCardColor(cardIndex);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-0 border-3 border-foreground/80 rounded-xl shadow-[8px_8px_0_hsl(var(--foreground)/0.8)] bg-background"
-        style={{ borderWidth: '3px' }}
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full sm:w-[520px] md:w-[600px] lg:w-[680px] p-0 border-l-[3px] border-foreground/80 shadow-[-8px_0_0_hsl(var(--foreground)/0.15)] overflow-y-auto [&>button]:hidden"
       >
         {/* Colored header block matching card */}
-        <div className="px-6 pt-5 pb-4 rounded-t-xl" style={{ backgroundColor: headerColor }}>
+        <div className="px-6 pt-5 pb-4 sticky top-0 z-10" style={{ backgroundColor: headerColor }}>
           <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <DialogHeader className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{getCategoryEmoji(entry.categories?.name)}</span>
-                  <DialogTitle className="text-xl font-black text-foreground/90">
-                    {entry.title}
-                  </DialogTitle>
-                </div>
-                <DialogDescription asChild>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {entry.categories && (
-                      <Badge className="bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
-                        {entry.categories.name}
-                      </Badge>
-                    )}
-                    <span className="text-xs text-foreground/50">
-                      {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
-                    </span>
-                    {entry.contributors.length > 1 && (
-                      <span className="text-xs text-foreground/50">
-                        · {entry.contributors.length} 位贡献者
-                      </span>
-                    )}
-                    {entry.is_private && (
-                      <Badge variant="outline" className="text-[10px] gap-0.5 border-foreground/30">
-                        <EyeOff className="h-3 w-3" />私密
-                      </Badge>
-                    )}
-                  </div>
-                </DialogDescription>
-              </DialogHeader>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{getCategoryEmoji(entry.categories?.name)}</span>
+                <h2 className="text-xl font-black text-foreground/90">
+                  {entry.title}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {entry.categories && (
+                  <Badge className="bg-foreground/80 text-background text-[11px] border-0 rounded-sm">
+                    {entry.categories.name}
+                  </Badge>
+                )}
+                <span className="text-xs text-foreground/50">
+                  {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
+                </span>
+                {entry.contributors.length > 1 && (
+                  <span className="text-xs text-foreground/50">
+                    · {entry.contributors.length} 位贡献者
+                  </span>
+                )}
+                {entry.is_private && (
+                  <Badge variant="outline" className="text-[10px] gap-0.5 border-foreground/30">
+                    <EyeOff className="h-3 w-3" />私密
+                  </Badge>
+                )}
+              </div>
             </div>
-            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} layoutStyle="neubrutalism" />
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="neubrutalism" />
           </div>
         </div>
 
         {/* Content with white background */}
-        <div className="px-6 py-5">
+        <div className="px-6 py-5 bg-background">
           <MarkdownRenderer content={entry.content} />
         </div>
 
         {/* Brutalist footer */}
-        <div className="px-6 pb-5">
+        <div className="px-6 pb-5 bg-background">
           <div className="border-t-2 border-foreground/20 pt-3 flex items-center justify-center">
             <span className="text-xs font-bold text-foreground/30 uppercase tracking-widest">— END —</span>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 /* ═══════════════════════════════════════════════
-   DEFAULT / FALLBACK (original style)
+   DEFAULT / FALLBACK (bento-glass uses CyberLayout's built-in detail)
    ═══════════════════════════════════════════════ */
 function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
   if (!entry) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-start justify-between gap-2 pr-6">
-            <div className="flex items-center gap-2 flex-wrap">
-              <DialogTitle className="text-xl">{entry.title}</DialogTitle>
-              {entry.is_private && (
-                <Badge variant="outline" className="text-xs gap-1">
-                  <EyeOff className="h-3 w-3" />私密
-                </Badge>
-              )}
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:w-[520px] md:w-[600px] p-0 overflow-y-auto [&>button]:hidden">
+        <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background z-10">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0 space-y-1">
+              <h2 className="text-xl font-semibold">{entry.title}</h2>
+              <div className="flex items-center gap-2">
+                {entry.categories && <Badge variant="secondary">{entry.categories.name}</Badge>}
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
+                </span>
+                {entry.is_private && (
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <EyeOff className="h-3 w-3" />私密
+                  </Badge>
+                )}
+              </div>
             </div>
-            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onOpenChange={onOpenChange} />
+            <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} />
           </div>
-          <DialogDescription asChild>
-            <div className="flex items-center gap-2 pt-1">
-              {entry.categories && <Badge variant="secondary">{entry.categories.name}</Badge>}
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}
-              </span>
-              {entry.contributors.length > 1 && (
-                <span className="text-xs text-muted-foreground">· {entry.contributors.length} 位贡献者</span>
-              )}
-            </div>
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mt-2">
+        </div>
+        <div className="px-6 py-5">
           <MarkdownRenderer content={entry.content} />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 

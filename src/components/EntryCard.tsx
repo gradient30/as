@@ -138,7 +138,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       </div>
 
       {/* Category + tags */}
-      <div className="flex items-center gap-1.5 mb-2 text-[10px] tracking-widest text-[hsl(180,80%,60%/0.6)] uppercase font-mono">
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] tracking-widest text-[hsl(180,80%,60%)] uppercase font-mono">
         <span>{entry.categories?.name || '未知分类'}</span>
         {tags.slice(0, 2).map((t, i) => (
           <span key={i}>· {t}</span>

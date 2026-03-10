@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useEntries, useVisibleCategories, useMyAdminCategoryIds, useDeleteEntry, useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { CategoryRow } from '@/hooks/useEntries';
+
 import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';

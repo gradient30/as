@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react';
 import { useEntries, useCategories, useMyAdminCategoryIds, useDeleteEntry } from '@/hooks/useEntries';
+import { useAuth, useIsAdmin } from '@/hooks/useAuth';
 import { EntryCard } from '@/components/EntryCard';
 import { EntryDetail } from '@/components/EntryDetail';
 import { SubmitDialog } from '@/components/SubmitDialog';
 import { EditDialog } from '@/components/EditDialog';
 import { AdminPanel } from '@/components/AdminPanel';
+import { AuthDialog } from '@/components/AuthDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun } from 'lucide-react';
+import { Plus, BookOpen, Search, Settings, Eye, Moon, Sun, LogIn, LogOut, User } from 'lucide-react';
 import { getAuthorToken } from '@/lib/author-token';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import {
@@ -44,7 +46,10 @@ const Index = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [manageMode, setManageMode] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
 
+  const { user, signOut } = useAuth();
+  const isGlobalAdmin = useIsAdmin();
   const { data: entries, isLoading: entriesLoading } = useEntries(categoryFilter);
   const { data: categories } = useCategories();
   const { data: adminCategoryIds } = useMyAdminCategoryIds();
@@ -52,7 +57,7 @@ const Index = () => {
   const authorToken = getAuthorToken();
   const { dark, toggle: toggleDark } = useDarkMode();
 
-  const hasAdminRights = adminCategoryIds && adminCategoryIds.size > 0;
+  const hasAdminRights = isGlobalAdmin || (adminCategoryIds && adminCategoryIds.size > 0);
 
   // Check if user can manage a specific entry
   const canManageEntry = (entry: EntryWithCategory) => {
@@ -103,15 +108,29 @@ const Index = () => {
             <Button size="icon" variant="ghost" onClick={toggleDark} className="h-9 w-9">
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            {/* Manage mode toggle — visible to anyone who has admin rights or authored entries */}
-            {hasAdminRights && (
-              <Button
-                size="sm"
-                variant={manageMode ? 'default' : 'outline'}
-                onClick={() => setManageMode(!manageMode)}
-              >
-                {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                {manageMode ? '浏览模式' : '管理模式'}
+            {user ? (
+              <>
+                <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[120px]">
+                  {user.email}
+                </span>
+                {hasAdminRights && (
+                  <Button
+                    size="sm"
+                    variant={manageMode ? 'default' : 'outline'}
+                    onClick={() => setManageMode(!manageMode)}
+                  >
+                    {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                    {manageMode ? '浏览模式' : '管理模式'}
+                  </Button>
+                )}
+                <Button size="icon" variant="ghost" onClick={signOut} className="h-9 w-9" title="退出登录">
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => setAuthOpen(true)}>
+                <LogIn className="h-4 w-4" />
+                登录
               </Button>
             )}
             <Button size="sm" onClick={() => setSubmitOpen(true)}>
@@ -221,6 +240,7 @@ const Index = () => {
         onDelete={() => selectedEntry && handleDelete(selectedEntry.id)}
       />
       <EditDialog entry={editEntry} open={editOpen} onOpenChange={setEditOpen} />
+      <AuthDialog open={authOpen} onOpenChange={setAuthOpen} />
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>

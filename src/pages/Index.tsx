@@ -441,17 +441,17 @@ function ViewTabs({ viewMode, setViewMode, variant }: {
     );
   }
 
-  // glass
+  // glass (cyberpunk)
   return (
     <div className="flex gap-2">
       {tabs.map(t => (
         <button
           key={t.key}
           onClick={() => setViewMode(t.key)}
-          className={`px-3 py-1 text-sm rounded-full backdrop-blur transition-all ${
+          className={`px-4 py-1.5 text-xs font-mono tracking-wider transition-all border ${
             viewMode === t.key
-              ? 'bg-primary text-primary-foreground font-bold'
-              : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+              ? 'border-[hsl(180,100%,50%/0.6)] bg-[hsl(180,100%,50%/0.1)] text-[hsl(180,100%,60%)] font-bold'
+              : 'border-[hsl(220,30%,25%)] text-[hsl(210,20%,50%)] hover:border-[hsl(180,100%,50%/0.3)]'
           }`}
         >
           {t.label}

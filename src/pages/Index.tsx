@@ -589,35 +589,8 @@ function SkeletonLoader({ style }: { style: string }) {
     );
   }
 
-  // Bento Glass (cyberpunk)
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className={`p-5 space-y-3 cyber-border cyber-border-bottom bg-[hsl(220,40%,8%)/0.6] animate-pulse ${i === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
-        >
-          <div className="flex gap-2">
-            <Skeleton className="h-5 w-14 bg-[hsl(180,100%,50%/0.1)]" />
-            <Skeleton className="h-5 w-20 bg-[hsl(220,30%,15%)]" />
-          </div>
-          <Skeleton className="h-3 w-32 bg-[hsl(220,30%,15%)]" />
-          <Skeleton className={`${i === 0 ? 'h-9' : 'h-6'} w-3/4 bg-[hsl(180,100%,50%/0.08)]`} />
-          <Skeleton className="h-4 w-full bg-[hsl(220,30%,12%)]" />
-          {i === 0 && (
-            <div className="flex items-center gap-4 mt-2">
-              <Skeleton className="h-16 w-16 rounded-full bg-[hsl(180,100%,50%/0.08)]" />
-              <Skeleton className="h-8 w-20 bg-[hsl(220,30%,12%)]" />
-            </div>
-          )}
-          <div className="flex justify-between border-t border-[hsl(180,100%,50%/0.05)] pt-3">
-            <Skeleton className="h-3 w-32 bg-[hsl(220,30%,12%)]" />
-            <Skeleton className="h-3 w-12 bg-[hsl(220,30%,12%)]" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  // default
+  return null;
 }
 
 export default Index;

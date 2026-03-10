@@ -21,6 +21,16 @@
 
   <body>
     <script>if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')</script>
+    <script>
+      // GitHub Pages SPA: restore redirect path from 404.html
+      (function(){
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.pathname + location.search + location.hash) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

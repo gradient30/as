@@ -8,12 +8,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Get basename from Vite's base config (strip trailing slash for react-router)
+const base = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={base}>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

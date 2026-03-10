@@ -106,8 +106,12 @@ export function findBestCategory(
  */
 export function generateCategoryName(keywords: string[]): string {
   if (keywords.length === 0) return '未分类';
-  // Take top 2-3 keywords as category name
-  return keywords.slice(0, 3).join(' · ');
+  // Pick the single most representative keyword (2-5 chars)
+  const best = keywords
+    .filter(k => k.length >= 2 && k.length <= 5)
+    .slice(0, 1);
+  if (best.length === 0) return keywords[0].slice(0, 5);
+  return best[0];
 }
 
 /**

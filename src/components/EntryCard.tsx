@@ -173,7 +173,7 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
             </span>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-[hsl(210,20%,45%)] uppercase tracking-widest">完成度</p>
+            <p className="text-[10px] text-[hsl(210,20%,60%)] uppercase tracking-widest">完成度</p>
           </div>
           <div className="ml-auto text-right">
             <p className="text-3xl font-black text-[hsl(180,100%,60%)] font-mono tracking-tight">{reads}</p>

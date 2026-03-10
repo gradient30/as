@@ -20,6 +20,7 @@ import {
   Table,
   Minus,
   CheckSquare,
+  FileCode,
 } from 'lucide-react';
 import {
   Tooltip,

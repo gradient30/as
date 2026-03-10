@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, EyeOff } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
 interface EntryCardProps {
@@ -15,6 +15,8 @@ interface EntryCardProps {
 }
 
 export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onDelete }: EntryCardProps) {
+  const isPrivate = (entry as any).is_private;
+
   return (
     <Card
       className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border-border/60 relative group"
@@ -47,6 +49,12 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onD
           <CardTitle className="text-base font-semibold leading-snug line-clamp-2">
             {entry.title}
           </CardTitle>
+          {isPrivate && (
+            <Badge variant="outline" className="text-xs gap-1 shrink-0">
+              <EyeOff className="h-3 w-3" />
+              私密
+            </Badge>
+          )}
         </div>
         {entry.categories && (
           <Badge variant="secondary" className="w-fit text-xs mt-1">
@@ -56,7 +64,8 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onD
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-          {entry.content}
+          {/* Strip markdown for card preview */}
+          {entry.content.replace(/[#*`~\[\]>!|-]/g, '').replace(/\n/g, ' ').trim()}
         </p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{format(new Date(entry.created_at), 'yyyy-MM-dd HH:mm')}</span>

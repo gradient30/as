@@ -292,12 +292,12 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
 /* ═══════════════════════════════════════════════
    DEFAULT / FALLBACK (bento-glass uses CyberLayout's built-in detail)
    ═══════════════════════════════════════════════ */
-function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+function DefaultDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
   if (!entry) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px] p-0 overflow-y-auto [&>button]:hidden">
+      <SheetContent side={drawerSide} className={`${getSizeClasses(drawerSide)} p-0 overflow-y-auto [&>button]:hidden`}>
         <div className="px-6 pt-6 pb-4 border-b border-border/40 sticky top-0 bg-background z-10">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0 space-y-1">

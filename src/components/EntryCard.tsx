@@ -196,18 +196,18 @@ function BentoGlassCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit
       )}
 
       {/* Bottom: timestamp + status + reads */}
-      <div className="flex items-center justify-between border-t border-[hsl(180,100%,50%/0.1)] pt-3">
+      <div className="flex items-center justify-between border-t border-[hsl(180,100%,50%/0.15)] pt-3">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-[hsl(180,80%,50%)] animate-pulse-cyber">●</span>
-          <span className="text-[hsl(180,80%,50%)] text-[10px] font-mono uppercase tracking-wider">
+          <span className="text-[10px] text-[hsl(180,80%,55%)] animate-pulse-cyber">●</span>
+          <span className="text-[hsl(180,80%,55%)] text-[10px] font-mono uppercase tracking-wider">
             ACTIVE
           </span>
-          <span className="text-[10px] text-[hsl(210,20%,40%)] font-mono">
+          <span className="text-[10px] text-[hsl(210,20%,58%)] font-mono">
             {format(new Date(entry.created_at), 'yyyy-MM-dd · HH:mm')}
           </span>
         </div>
         {!isLarge && (
-          <div className="flex items-center gap-1.5 text-[hsl(210,20%,45%)]">
+          <div className="flex items-center gap-1.5 text-[hsl(210,20%,60%)]">
             <Activity className="h-3 w-3" />
             <span className="text-[10px] font-mono">{reads}</span>
           </div>

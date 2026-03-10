@@ -65,7 +65,7 @@ export function EntryDetail({ entry, open, onOpenChange, canManage, onEdit, onDe
             </div>
             <div className="flex gap-1 shrink-0">
               <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleShare}>
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Share2 className="h-4 w-4" />}
+                {copied ? <Check className="h-4 w-4 text-primary" /> : <Share2 className="h-4 w-4" />}
               </Button>
               {canManage && (
                 <>

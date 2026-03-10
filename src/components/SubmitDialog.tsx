@@ -120,7 +120,7 @@ export function SubmitDialog({ open, onOpenChange }: SubmitDialogProps) {
               私密提交
             </Button>
             <Button type="submit" disabled={submitEntry.isPending || !title.trim() || !content.trim()}>
-              {submitEntry.isPending && !isPrivate && <Loader2 className="animate-spin" />}
+              {submitEntry.isPending && <Loader2 className="animate-spin" />}
               提交
             </Button>
           </div>

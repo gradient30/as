@@ -328,7 +328,7 @@ const Index = () => {
                 onEdit={() => handleEdit(entry)}
                 onDelete={() => handleDelete(entry.id)}
                 onToggleVisibility={() => toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private })}
-                onClick={() => { setSelectedEntry(entry); setDetailOpen(true); }}
+                onClick={() => { setSelectedEntry(entry); setSelectedEntryIndex(i); setDetailOpen(true); }}
                 layoutStyle={style}
                 index={i}
               />

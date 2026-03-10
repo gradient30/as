@@ -67,16 +67,16 @@ function EntryListItem({ entry, isSelected, onClick }: {
       }`}
     >
       <div className="flex items-center justify-between mb-0.5">
-        <h4 className="text-xs font-bold text-[hsl(var(--cyber-text))] line-clamp-1 flex items-center gap-1.5">
-          <span className="text-sm">{getCategoryEmoji(entry.categories?.name)}</span>
+      <h4 className="text-sm font-bold text-[hsl(var(--cyber-text))] line-clamp-1 flex items-center gap-1.5">
+          <span className="text-base">{getCategoryEmoji(entry.categories?.name)}</span>
           {entry.title}
           {entry.is_private && <EyeOff className="h-3 w-3 text-[hsl(var(--cyber-accent)/0.5)] flex-shrink-0" />}
         </h4>
-        <span className="text-[9px] text-[hsl(var(--cyber-text-dim))] font-mono ml-2 flex-shrink-0">
+        <span className="text-[10px] text-[hsl(var(--cyber-text-secondary))] font-mono ml-2 flex-shrink-0">
           {format(new Date(entry.created_at), 'HH:mm')}
         </span>
       </div>
-      <p className="text-[10px] text-[hsl(var(--cyber-text-muted))] line-clamp-1 pl-5">
+      <p className="text-xs text-[hsl(var(--cyber-text-muted))] line-clamp-1 pl-6">
         {snippet.slice(0, 80)}
       </p>
     </div>

@@ -277,7 +277,7 @@ const Index = () => {
 
         {/* Search */}
         <div className={`relative ${style === 'bento-glass' ? 'border border-[hsl(180,100%,50%/0.2)] bg-[hsl(220,40%,8%)] backdrop-blur' : style === 'neubrutalism' ? 'border-2 border-foreground/80 rounded-xl overflow-hidden' : ''}`}>
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.5)]' : 'text-muted-foreground'}`} />
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${style === 'bento-glass' ? 'text-[hsl(180,80%,50%/0.7)]' : 'text-muted-foreground'}`} />
           <Input
             placeholder={style === 'bento-glass' ? 'SEARCH KNOWLEDGE BASE...' : '搜索知识...'}
             value={searchQuery}

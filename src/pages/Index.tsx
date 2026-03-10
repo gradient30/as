@@ -264,7 +264,7 @@ const Index = () => {
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={
             style === 'dark-editorial'
-              ? 'divide-y-0'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
               : style === 'bento-glass'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto'
               : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'

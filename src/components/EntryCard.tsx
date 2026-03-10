@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Pencil, Trash2, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, EyeOff, User } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 
 interface EntryCardProps {
@@ -10,11 +10,12 @@ interface EntryCardProps {
   onClick?: () => void;
   isManageMode?: boolean;
   canManage?: boolean;
+  isOwn?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
-export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onDelete }: EntryCardProps) {
+export function EntryCard({ entry, onClick, isManageMode, canManage, isOwn, onEdit, onDelete }: EntryCardProps) {
   const isPrivate = (entry as any).is_private;
 
   return (
@@ -22,6 +23,16 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onD
       className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border-border/60 relative group"
       onClick={onClick}
     >
+      {/* Own entry badge */}
+      {isOwn && (
+        <div className="absolute top-0 left-0 z-10">
+          <div className="bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-br-lg rounded-tl-[calc(var(--radius)-1px)] flex items-center gap-1">
+            <User className="h-3 w-3" />
+            我的
+          </div>
+        </div>
+      )}
+
       {/* Admin overlay actions */}
       {isManageMode && canManage && (
         <div className="absolute top-2 right-2 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -64,7 +75,6 @@ export function EntryCard({ entry, onClick, isManageMode, canManage, onEdit, onD
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-          {/* Strip markdown for card preview */}
           {entry.content.replace(/[#*`~\[\]>!|-]/g, '').replace(/\n/g, ' ').trim()}
         </p>
         <div className="flex items-center justify-between text-xs text-muted-foreground">

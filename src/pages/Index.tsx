@@ -117,14 +117,25 @@ const Index = () => {
                   {user.email}
                 </span>
                 {hasAdminRights && (
-                  <Button
-                    size="sm"
-                    variant={manageMode ? 'default' : 'outline'}
-                    onClick={() => setManageMode(!manageMode)}
-                  >
-                    {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
-                    {manageMode ? '浏览模式' : '管理模式'}
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant={manageMode ? 'default' : 'outline'}
+                      onClick={() => setManageMode(!manageMode)}
+                    >
+                      {manageMode ? <Eye className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
+                      {manageMode ? '浏览模式' : '管理模式'}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9"
+                      onClick={() => setCategoryManagerOpen(true)}
+                      title="分类管理"
+                    >
+                      <Tags className="h-4 w-4" />
+                    </Button>
+                  </>
                 )}
                 <Button size="icon" variant="ghost" onClick={signOut} className="h-9 w-9" title="退出登录">
                   <LogOut className="h-4 w-4" />

@@ -479,7 +479,7 @@ export function CyberLayout({
   return (
     <div className="h-[calc(100vh-41px)] flex flex-col cyber-theme px-4">
       {/* Top nav bar */}
-      <nav className="px-4 py-2.5 flex items-center justify-between border-b border-[hsl(var(--cyber-border))] flex-shrink-0">
+      <nav className="py-2.5 flex items-center justify-between border-b border-[hsl(var(--cyber-border))] flex-shrink-0">
         <div className="flex items-center gap-3">
           <img src={logoFish} alt="openwz" className="h-7 w-7 object-contain" />
           <div>

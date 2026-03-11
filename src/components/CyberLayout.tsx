@@ -477,7 +477,7 @@ export function CyberLayout({
   const useVirtual = flatEntries.length > 100;
 
   return (
-    <div className="h-[calc(100vh-41px)] flex flex-col cyber-theme px-4">
+    <div className="h-[calc(100vh-41px)] flex flex-col cyber-theme container mx-auto px-4">
       {/* Top nav bar */}
       <nav className="py-2.5 flex items-center justify-between border-b border-[hsl(var(--cyber-border))] flex-shrink-0">
         <div className="flex items-center gap-3">

@@ -338,7 +338,7 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
         </div>
 
         <div
-          className={`${proseSizeClasses[fontSize]} max-w-none
+          className={`max-w-none
             prose-headings:text-[hsl(var(--cyber-heading))] prose-headings:font-black prose-headings:border-l-2 prose-headings:border-[hsl(var(--cyber-heading))] prose-headings:pl-3
             prose-p:text-[hsl(var(--cyber-text))] prose-p:leading-relaxed
             prose-strong:text-[hsl(var(--cyber-text))] prose-strong:font-black
@@ -349,7 +349,7 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
             prose-hr:border-[hsl(var(--cyber-border))]`}
           style={{ lineHeight: 1.8 }}
         >
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} proseSize={proseSizeClasses[fontSize]} />
         </div>
 
         <div className="mt-12 pt-6 border-t border-[hsl(var(--cyber-border-subtle))] text-center">

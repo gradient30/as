@@ -218,8 +218,8 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
     toggleVisibility.mutate({ id: entry.id, is_private: !entry.is_private });
   };
 
-  // Font size: use inline style for reliable scaling
-  const fontSizeValues = [14, 16, 18, 20];
+   // Font size: use Tailwind prose size classes for reliable scaling
+  const proseSizeClasses = ['prose-sm', 'prose-base', 'prose-lg', 'prose-xl'];
 
   return (
     <div className="h-full flex flex-col">

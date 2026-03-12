@@ -15,6 +15,7 @@ import { Pencil, Trash2, Share2, EyeOff, Eye, Check, Copy, ExternalLink, Message
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Type } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import { useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { LayoutStyle } from '@/hooks/useLayoutStyle';
@@ -62,6 +63,33 @@ function getSizeClasses(side: SheetSide): string {
     return 'h-[70vh] sm:h-[60vh] w-full';
   }
   return 'w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px]';
+}
+
+const PROSE_SIZE_CLASSES = ['prose-sm', 'prose-base', 'prose-lg', 'prose-xl'];
+const FONT_LABELS = ['A', 'A', 'A', 'A'];
+
+function FontSizeControl({ fontSize, setFontSize, variant = 'default' }: { fontSize: number; setFontSize: (v: number) => void; variant?: 'default' | 'neu' }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      <Type className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+      {FONT_LABELS.map((label, i) => (
+        <button
+          key={i}
+          onClick={() => setFontSize(i)}
+          className={`w-6 h-6 flex items-center justify-center font-bold rounded transition-all text-xs ${
+            fontSize === i
+              ? variant === 'neu'
+                ? 'bg-foreground/80 text-background'
+                : 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          style={{ fontSize: `${10 + i * 2}px` }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCategory; shareOpen: boolean; setShareOpen: (v: boolean) => void }) {
@@ -179,6 +207,7 @@ function ActionButtons({ entry, canManage, onEdit, onDelete, onClose, layoutStyl
    EDITORIAL STYLE — right drawer, white, thin borders, light shadow
    ═══════════════════════════════════════════════ */
 function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+  const [fontSize, setFontSize] = useState(1);
   if (!entry) return null;
 
   return (
@@ -208,10 +237,13 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
             </div>
             <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="dark-editorial" />
           </div>
+          <div className="mt-3 flex justify-end">
+            <FontSizeControl fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
         </div>
         {/* Content area */}
         <div className="px-6 py-5">
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} proseSize={PROSE_SIZE_CLASSES[fontSize]} />
         </div>
         {/* Minimal footer line */}
         <div className="px-6 pb-6">
@@ -228,6 +260,7 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
    NEUBRUTALISM STYLE — right drawer, colored header, thick border, hard shadow
    ═══════════════════════════════════════════════ */
 function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle'>) {
+  const [fontSize, setFontSize] = useState(1);
   if (!entry) return null;
 
   const headerColor = getCardColor(cardIndex);
@@ -271,11 +304,14 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
             </div>
             <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="neubrutalism" />
           </div>
+          <div className="mt-3 flex justify-end">
+            <FontSizeControl fontSize={fontSize} setFontSize={setFontSize} variant="neu" />
+          </div>
         </div>
 
         {/* Content with white background */}
         <div className="px-6 py-5 bg-background">
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} proseSize={PROSE_SIZE_CLASSES[fontSize]} />
         </div>
 
         {/* Brutalist footer */}

@@ -207,6 +207,7 @@ function ActionButtons({ entry, canManage, onEdit, onDelete, onClose, layoutStyl
    EDITORIAL STYLE — right drawer, white, thin borders, light shadow
    ═══════════════════════════════════════════════ */
 function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle' | 'cardIndex'>) {
+  const [fontSize, setFontSize] = useState(1);
   if (!entry) return null;
 
   return (
@@ -236,10 +237,13 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
             </div>
             <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="dark-editorial" />
           </div>
+          <div className="mt-3 flex justify-end">
+            <FontSizeControl fontSize={fontSize} setFontSize={setFontSize} />
+          </div>
         </div>
         {/* Content area */}
         <div className="px-6 py-5">
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} proseSize={PROSE_SIZE_CLASSES[fontSize]} />
         </div>
         {/* Minimal footer line */}
         <div className="px-6 pb-6">
@@ -256,6 +260,7 @@ function EditorialDetail({ entry, open, onOpenChange, canManage, onEdit, onDelet
    NEUBRUTALISM STYLE — right drawer, colored header, thick border, hard shadow
    ═══════════════════════════════════════════════ */
 function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, cardIndex = 0, drawerSide = 'right' }: Omit<EntryDetailProps, 'layoutStyle'>) {
+  const [fontSize, setFontSize] = useState(1);
   if (!entry) return null;
 
   const headerColor = getCardColor(cardIndex);

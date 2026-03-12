@@ -338,15 +338,16 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
         </div>
 
         <div
-          className="prose prose-invert max-w-none
+          className="prose max-w-none
             prose-headings:text-[hsl(var(--cyber-heading))] prose-headings:font-black prose-headings:border-l-2 prose-headings:border-[hsl(var(--cyber-heading))] prose-headings:pl-3
-            prose-p:text-[hsl(var(--cyber-text-secondary))] prose-p:leading-relaxed
-            prose-strong:text-[hsl(var(--cyber-text))]
-            prose-a:text-[hsl(var(--cyber-accent))]
+            prose-p:text-[hsl(var(--cyber-text))] prose-p:leading-relaxed
+            prose-strong:text-[hsl(var(--cyber-text))] prose-strong:font-black
+            prose-a:text-[hsl(var(--cyber-accent-text))] prose-a:font-semibold
             prose-code:text-[hsl(var(--cyber-accent-text))]
-            prose-li:text-[hsl(var(--cyber-text-secondary))]
-            [&_p]:!text-[length:inherit] [&_li]:!text-[length:inherit] [&_blockquote]:!text-[length:inherit]"
-          style={{ fontSize: `${fontSizeValues[fontSize]}px` }}
+            prose-li:text-[hsl(var(--cyber-text))]
+            prose-blockquote:text-[hsl(var(--cyber-text-secondary))]
+            prose-hr:border-[hsl(var(--cyber-border))]"
+          style={{ fontSize: `${fontSizeValues[fontSize]}px`, lineHeight: 1.8 }}
         >
           <MarkdownRenderer content={entry.content} />
         </div>

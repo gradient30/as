@@ -65,6 +65,33 @@ function getSizeClasses(side: SheetSide): string {
   return 'w-full sm:w-[65vw] md:w-[55vw] lg:w-[50vw] xl:w-[45vw] min-w-[33vw] max-w-[900px]';
 }
 
+const PROSE_SIZE_CLASSES = ['prose-sm', 'prose-base', 'prose-lg', 'prose-xl'];
+const FONT_LABELS = ['A', 'A', 'A', 'A'];
+
+function FontSizeControl({ fontSize, setFontSize, variant = 'default' }: { fontSize: number; setFontSize: (v: number) => void; variant?: 'default' | 'neu' }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      <Type className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+      {FONT_LABELS.map((label, i) => (
+        <button
+          key={i}
+          onClick={() => setFontSize(i)}
+          className={`w-6 h-6 flex items-center justify-center font-bold rounded transition-all text-xs ${
+            fontSize === i
+              ? variant === 'neu'
+                ? 'bg-foreground/80 text-background'
+                : 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+          style={{ fontSize: `${10 + i * 2}px` }}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCategory; shareOpen: boolean; setShareOpen: (v: boolean) => void }) {
   const [copied, setCopied] = useState(false);
   const shareUrl = getShareUrl(entry);

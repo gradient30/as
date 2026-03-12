@@ -15,6 +15,7 @@ import { Pencil, Trash2, Share2, EyeOff, Eye, Check, Copy, ExternalLink, Message
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Type } from 'lucide-react';
 import type { EntryWithCategory } from '@/hooks/useEntries';
 import { useToggleEntryVisibility } from '@/hooks/useEntries';
 import type { LayoutStyle } from '@/hooks/useLayoutStyle';

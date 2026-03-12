@@ -304,11 +304,14 @@ function NeuDetail({ entry, open, onOpenChange, canManage, onEdit, onDelete, car
             </div>
             <ActionButtons entry={entry} canManage={canManage} onEdit={onEdit} onDelete={onDelete} onClose={() => onOpenChange(false)} layoutStyle="neubrutalism" />
           </div>
+          <div className="mt-3 flex justify-end">
+            <FontSizeControl fontSize={fontSize} setFontSize={setFontSize} variant="neu" />
+          </div>
         </div>
 
         {/* Content with white background */}
         <div className="px-6 py-5 bg-background">
-          <MarkdownRenderer content={entry.content} />
+          <MarkdownRenderer content={entry.content} proseSize={PROSE_SIZE_CLASSES[fontSize]} />
         </div>
 
         {/* Brutalist footer */}

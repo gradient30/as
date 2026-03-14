@@ -1,7 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
-import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET = 'markdown-images';
+
+function generateId() {
+  return crypto.randomUUID();
+}
 
 /**
  * Upload an image file to storage and return its public URL.

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import { HotNewsPanel } from '@/components/HotNewsPanel';
 import logoFish from '@/assets/logo-fish.png';
 import { format } from 'date-fns';
 import { Search, Plus, Command, X, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Share2, EyeOff, Eye, Trash2, MessageCircle, ExternalLink, Check } from 'lucide-react';

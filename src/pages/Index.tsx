@@ -318,8 +318,10 @@ const Index = () => {
           />
         )}
 
-        {/* Entry grid */}
-        {activeLoading ? (
+        {/* Content area */}
+        {viewMode === 'hotspot' ? (
+          <HotNewsPanel variant="default" />
+        ) : activeLoading ? (
           <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={

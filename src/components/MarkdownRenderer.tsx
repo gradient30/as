@@ -140,7 +140,7 @@ export function MarkdownRenderer({ content, className = '', proseSize = 'prose-s
 
             return (
               <div className="relative group not-prose">
-                <pre {...props} className="rounded-lg bg-muted/50 p-4 overflow-x-auto text-sm">
+                <pre {...props} className="rounded-lg bg-secondary dark:bg-[hsl(220,40%,13%)] p-4 overflow-x-auto text-sm border border-border">
                   {children}
                 </pre>
                 <CodeCopyButton code={codeText} />

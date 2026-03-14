@@ -58,9 +58,9 @@ export function useHotNewsSources() {
 export function useScrapeHotNews() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (sourceIds?: string[]) => {
+    mutationFn: async (sourceIds?: string[] | void) => {
       const { data, error } = await supabase.functions.invoke('scrape-hot-news', {
-        body: { source_ids: sourceIds },
+        body: { source_ids: sourceIds || undefined },
       });
       if (error) throw error;
       return data;

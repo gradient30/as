@@ -11,7 +11,7 @@ function generateId() {
  */
 export async function uploadMarkdownImage(file: File): Promise<string> {
   const ext = file.name.split('.').pop() || 'png';
-  const path = `${uuidv4()}.${ext}`;
+  const path = `${generateId()}.${ext}`;
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: '3600',

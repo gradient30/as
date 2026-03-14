@@ -580,6 +580,16 @@ export function CyberLayout({
             >
               我的
             </button>
+            <button
+              className={`px-2.5 py-1 text-[10px] font-mono tracking-wider transition-all border ${
+                viewMode === 'hotspot'
+                  ? 'border-[hsl(25,80%,55%)/0.5] bg-[hsl(25,80%,55%)/0.1] text-[hsl(25,80%,55%)] font-bold'
+                  : 'border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-text-muted))] hover:border-[hsl(25,80%,55%)/0.3]'
+              }`}
+              onClick={() => setViewMode(viewMode === 'hotspot' ? 'discover' : 'hotspot')}
+            >
+              🔥热点
+            </button>
           </div>
 
           {/* Document count */}

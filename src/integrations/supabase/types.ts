@@ -225,6 +225,78 @@ export type Database = {
           },
         ]
       }
+      hot_news: {
+        Row: {
+          content: string
+          created_by: string | null
+          id: string
+          is_visible: boolean
+          keywords: string[]
+          news_date: string
+          scraped_at: string
+          source_name: string
+          source_url: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_by?: string | null
+          id?: string
+          is_visible?: boolean
+          keywords?: string[]
+          news_date?: string
+          scraped_at?: string
+          source_name: string
+          source_url: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_by?: string | null
+          id?: string
+          is_visible?: boolean
+          keywords?: string[]
+          news_date?: string
+          scraped_at?: string
+          source_name?: string
+          source_url?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      hot_news_sources: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_enabled: boolean
+          keywords: string[]
+          max_items: number
+          name: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          keywords?: string[]
+          max_items?: number
+          name: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_enabled?: boolean
+          keywords?: string[]
+          max_items?: number
+          name?: string
+          url?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

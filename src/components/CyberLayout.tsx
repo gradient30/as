@@ -530,6 +530,12 @@ export function CyberLayout({
           >
             我的
           </button>
+          <button
+            onClick={() => setViewMode('hotspot')}
+            className={`transition-colors font-bold ${viewMode === 'hotspot' ? 'text-[hsl(25,80%,55%)]' : 'text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(25,80%,55%)]'}`}
+          >
+            🔥热点
+          </button>
           <span className="text-[hsl(var(--cyber-accent))] text-sm font-black tracking-widest">{currentTime}</span>
           {headerActions}
         </div>

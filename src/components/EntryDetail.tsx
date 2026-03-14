@@ -36,7 +36,8 @@ interface EntryDetailProps {
 }
 
 function getShareUrl(entry: EntryWithCategory) {
-  let url = `${window.location.origin}/?entry=${entry.id}`;
+  const base = 'https://osb.996fb.cn';
+  let url = `${base}/?entry=${entry.id}`;
   if (entry.is_private && entry.share_token) {
     url += `&share=${entry.share_token}`;
   }

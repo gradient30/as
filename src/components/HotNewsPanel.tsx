@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RefreshCw, Plus, Trash2, ExternalLink, Flame, Settings2, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, Plus, Trash2, Flame, Settings2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 // Source icon/color mapping

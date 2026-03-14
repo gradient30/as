@@ -38,7 +38,7 @@ function extractHeadings(content: string): { level: number; text: string }[] {
 }
 
 function getShareUrl(entry: EntryWithCategory) {
-  const base = 'https://osb.996fb.cn';
+  const base = 'https://obs.996fb.cn';
   let url = `${base}/?entry=${entry.id}`;
   if (entry.is_private && entry.share_token) {
     url += `&share=${entry.share_token}`;

@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import { HotNewsPanel } from '@/components/HotNewsPanel';
 import logoFish from '@/assets/logo-fish.png';
 import { format } from 'date-fns';
 import { Search, Plus, Command, X, Copy, Pencil, Clock, BookOpen, ChevronDown, ChevronRight, Share2, EyeOff, Eye, Trash2, MessageCircle, ExternalLink, Check } from 'lucide-react';
@@ -426,8 +427,8 @@ interface CyberLayoutProps {
   setCategoryFilter: (id: string | undefined) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  viewMode: 'discover' | 'mine';
-  setViewMode: (v: 'discover' | 'mine') => void;
+  viewMode: 'discover' | 'mine' | 'hotspot';
+  setViewMode: (v: 'discover' | 'mine' | 'hotspot') => void;
   selectedEntry: EntryWithCategory | null;
   setSelectedEntry: (e: EntryWithCategory | null) => void;
   canManageEntry: (e: EntryWithCategory) => boolean;
@@ -529,6 +530,12 @@ export function CyberLayout({
           >
             我的
           </button>
+          <button
+            onClick={() => setViewMode('hotspot')}
+            className={`transition-colors font-bold ${viewMode === 'hotspot' ? 'text-[hsl(25,80%,55%)]' : 'text-[hsl(var(--cyber-text-dim))] hover:text-[hsl(25,80%,55%)]'}`}
+          >
+            🔥热点
+          </button>
           <span className="text-[hsl(var(--cyber-accent))] text-sm font-black tracking-widest">{currentTime}</span>
           {headerActions}
         </div>
@@ -572,6 +579,16 @@ export function CyberLayout({
               onClick={() => setViewMode(viewMode === 'mine' ? 'discover' : 'mine')}
             >
               我的
+            </button>
+            <button
+              className={`px-2.5 py-1 text-[10px] font-mono tracking-wider transition-all border ${
+                viewMode === 'hotspot'
+                  ? 'border-[hsl(25,80%,55%)/0.5] bg-[hsl(25,80%,55%)/0.1] text-[hsl(25,80%,55%)] font-bold'
+                  : 'border-[hsl(var(--cyber-border))] text-[hsl(var(--cyber-text-muted))] hover:border-[hsl(25,80%,55%)/0.3]'
+              }`}
+              onClick={() => setViewMode(viewMode === 'hotspot' ? 'discover' : 'hotspot')}
+            >
+              🔥热点
             </button>
           </div>
 
@@ -619,7 +636,9 @@ export function CyberLayout({
 
         {/* CENTER */}
         <main className="flex-1 overflow-hidden bg-[hsl(var(--cyber-content-bg))]">
-          {selectedEntry ? (
+          {viewMode === 'hotspot' ? (
+            <HotNewsPanel variant="cyber" />
+          ) : selectedEntry ? (
             <DetailView
               entry={selectedEntry}
               canManage={canManageEntry(selectedEntry)}

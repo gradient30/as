@@ -13,6 +13,7 @@ import { AuthDialog } from '@/components/AuthDialog';
 import { CategoryManager } from '@/components/CategoryManager';
 import { StyleSwitcher } from '@/components/StyleSwitcher';
 import { CyberLayout } from '@/components/CyberLayout';
+import { HotNewsPanel } from '@/components/HotNewsPanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -55,7 +56,7 @@ const Index = () => {
   const [manageMode, setManageMode] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'discover' | 'mine'>('discover');
+  const [viewMode, setViewMode] = useState<'discover' | 'mine' | 'hotspot'>('discover');
 
   const { user, signOut } = useAuth();
   const isGlobalAdmin = useIsAdmin();
@@ -317,8 +318,10 @@ const Index = () => {
           />
         )}
 
-        {/* Entry grid */}
-        {activeLoading ? (
+        {/* Content area */}
+        {viewMode === 'hotspot' ? (
+          <HotNewsPanel variant="default" />
+        ) : activeLoading ? (
           <SkeletonLoader style={style} />
         ) : filteredEntries && filteredEntries.length > 0 ? (
           <div className={
@@ -384,13 +387,14 @@ const Index = () => {
 };
 
 function ViewTabs({ viewMode, setViewMode, variant }: {
-  viewMode: 'discover' | 'mine';
-  setViewMode: (v: 'discover' | 'mine') => void;
+  viewMode: 'discover' | 'mine' | 'hotspot';
+  setViewMode: (v: 'discover' | 'mine' | 'hotspot') => void;
   variant: 'glass' | 'editorial' | 'neu';
 }) {
   const tabs = [
     { key: 'discover' as const, label: '发现' },
     { key: 'mine' as const, label: '我的' },
+    { key: 'hotspot' as const, label: '热点' },
   ];
 
   if (variant === 'editorial') {

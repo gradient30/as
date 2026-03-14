@@ -385,13 +385,14 @@ const Index = () => {
 };
 
 function ViewTabs({ viewMode, setViewMode, variant }: {
-  viewMode: 'discover' | 'mine';
-  setViewMode: (v: 'discover' | 'mine') => void;
+  viewMode: 'discover' | 'mine' | 'hotspot';
+  setViewMode: (v: 'discover' | 'mine' | 'hotspot') => void;
   variant: 'glass' | 'editorial' | 'neu';
 }) {
   const tabs = [
     { key: 'discover' as const, label: '发现' },
     { key: 'mine' as const, label: '我的' },
+    { key: 'hotspot' as const, label: '热点' },
   ];
 
   if (variant === 'editorial') {

@@ -426,8 +426,8 @@ interface CyberLayoutProps {
   setCategoryFilter: (id: string | undefined) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  viewMode: 'discover' | 'mine';
-  setViewMode: (v: 'discover' | 'mine') => void;
+  viewMode: 'discover' | 'mine' | 'hotspot';
+  setViewMode: (v: 'discover' | 'mine' | 'hotspot') => void;
   selectedEntry: EntryWithCategory | null;
   setSelectedEntry: (e: EntryWithCategory | null) => void;
   canManageEntry: (e: EntryWithCategory) => boolean;

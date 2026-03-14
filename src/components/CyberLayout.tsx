@@ -636,7 +636,9 @@ export function CyberLayout({
 
         {/* CENTER */}
         <main className="flex-1 overflow-hidden bg-[hsl(var(--cyber-content-bg))]">
-          {selectedEntry ? (
+          {viewMode === 'hotspot' ? (
+            <HotNewsPanel variant="cyber" />
+          ) : selectedEntry ? (
             <DetailView
               entry={selectedEntry}
               canManage={canManageEntry(selectedEntry)}

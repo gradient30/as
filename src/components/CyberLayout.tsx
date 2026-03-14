@@ -199,13 +199,16 @@ function DetailView({ entry, canManage, onEdit, onClose, onDelete }: {
 
   const shareToWeChat = () => {
     navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
-      toast.success('内容已复制，请打开微信粘贴分享');
+      toast.success('链接已复制，正在前往微信...');
+      window.open('weixin://', '_self');
     });
   };
 
   const shareToQQ = () => {
-    const qqUrl = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(entry.title)}&summary=${encodeURIComponent(shareText)}`;
-    window.open(qqUrl, '_blank', 'width=600,height=500');
+    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => {
+      toast.success('链接已复制，正在前往QQ...');
+      window.open('mqq://', '_self');
+    });
   };
 
   const shareToXiaohongshu = () => {

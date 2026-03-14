@@ -126,11 +126,11 @@ function SharePopover({ entry, shareOpen, setShareOpen }: { entry: EntryWithCate
           <p className="text-sm font-medium">分享到</p>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
-              onClick={() => navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => toast.success('内容已复制，请打开微信粘贴分享'))}>
+              onClick={() => navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => { toast.success('链接已复制，正在前往微信...'); window.open('weixin://', '_self'); })}>
               <MessageCircle className="h-3.5 w-3.5" />微信
             </Button>
             <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
-              onClick={() => window.open(`https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(entry.title)}&summary=${encodeURIComponent(shareText)}`, '_blank', 'width=600,height=500')}>
+              onClick={() => navigator.clipboard.writeText(`${shareText}\n${shareUrl}`).then(() => { toast.success('链接已复制，正在前往QQ...'); window.open('mqq://', '_self'); })}>
               QQ
             </Button>
             <Button size="sm" variant="outline" className="flex-1 gap-1.5 text-xs"
